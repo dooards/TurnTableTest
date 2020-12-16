@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using Ivi.Visa.Interop;
 
 
 
@@ -15,6 +16,9 @@ namespace TurnTableTest
 {
     public partial class Form1 : Form
     {
+        private ResourceManager RM = new ResourceManager();
+        private FormattedIO488 INST = new FormattedIO488();
+
         // 測定間隔
         int interval = 0;
         int MeasPoint;
