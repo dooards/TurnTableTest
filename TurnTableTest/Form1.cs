@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using Ivi.Visa.Interop;
-
+using System.Globalization;
 
 
 namespace TurnTableTest
@@ -250,28 +250,6 @@ namespace TurnTableTest
             }
         }
 
-        private string VNARead(string MFRQ)
-        {
-            string[] temp;
-            string ReadStr;
-            string FRQ = ":SENS1:FREQ:CENT " + MFRQ + "E6";
-            string MKR = ":CALC1:MARK1:X " + MFRQ + "E6";
-
-            var session_VNA = (Ivi.Visa.IMessageBasedSession)
-            Ivi.Visa.GlobalResourceManager.Open(textBox_visaPol.Text);
-            session_VNA.FormattedIO.WriteLine(FRQ);
-            session_VNA.FormattedIO.WriteLine(":CALC1:MARK1 ON");
-            session_VNA.FormattedIO.WriteLine(MKR);
-            session_VNA.FormattedIO.WriteLine(":CALC1:MARK1 OFF");
-            session_VNA.FormattedIO.WriteLine(":CALC1:MARK1:Y?");
-            ReadStr = session_VNA.FormattedIO.ReadLine();
-            temp = ReadStr.Split(',');
-
-            session_VNA.Dispose();
-            session_VNA = null;
-
-            return temp[0];
-        }
 
         private void TEST()
         {
@@ -285,18 +263,16 @@ namespace TurnTableTest
                 session_POL.Dispose();
                 session_POL = null;
 
-                string FRQ = ":SENS1:FREQ:CENT " + textBox_FreqCenter.Text + "E6";
-                string SPN = ":SENS1:FREQ:SPAN " + "0" + "E6";
-                string PNT = ":SENS1:SWE:POIN " + textBox_PointNum.Text;
-                string POW = ":SOUR1:POW " + textBox_Power.Text;
+                string SPN = ":SENS1:FREQ:SPAN 0E6";
+                string MK = ":CALC1:MARK1 ON";
+
 
                 //VNAセット
                 var session_VNA = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(textBox_visaPol.Text);
-                session_VNA.FormattedIO.WriteLine(FRQ);
+                Ivi.Visa.GlobalResourceManager.Open(textBox_visaVNA.Text);
                 session_VNA.FormattedIO.WriteLine(SPN);
-                session_VNA.FormattedIO.WriteLine(PNT);
-                session_VNA.FormattedIO.WriteLine(POW);
+                session_VNA.FormattedIO.WriteLine(MK);
+
                 session_VNA.Dispose();
                 session_VNA = null;
 
@@ -306,7 +282,7 @@ namespace TurnTableTest
 
                 //回転台接続開始
                 var session_turn = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(textBox_visaPol.Text);
+                Ivi.Visa.GlobalResourceManager.Open(textBox_visaTable.Text);
                 session_turn.FormattedIO.WriteLine("DL0");
                 session_turn.FormattedIO.WriteLine("S1");
                 session_turn.FormattedIO.WriteLine("HD0");
@@ -358,24 +334,7 @@ namespace TurnTableTest
 
                         if (Math.Abs(i * interval - CPOS) <= 0.2)
                         {
-                            if (checkBox1.Checked == true)
-                            {
-                                StreamWriter output = new StreamWriter(FileName, true, Encoding.Default);
-                                string results = Convert.ToString(i) + "," + VNARead(textBox_MK1.Text);
-
-                                output.WriteLine(results);
-                                output.Close();
-
-                            }
-                            if (checkBox2.Checked == true)
-                            {
-                                StreamWriter output = new StreamWriter(FileName, true, Encoding.Default);
-                                string results = Convert.ToString(i) + "," + VNARead(textBox_MK2.Text);
-
-                                output.WriteLine(results);
-                                output.Close();
-
-                            }
+                            VNAMEAS();
                         }
 
                         if(Math.Abs(i * interval - CPOS) > 2)
@@ -398,6 +357,153 @@ namespace TurnTableTest
 
         }
 
+        private void VNAMEAS()
+        {
+            string resultMK1 = null;
+            string resultMK2 = null;
+            string resultMK3 = null;
+            string resultMK4 = null;
+            string resultMK5 = null;
+            string resultMK6 = null;
+            string TEXTDATA = null;
+            string[] ReadResults;
+            double num;
+
+            try
+            {
+
+
+                for (int i = 1; i <7; i++)
+                {
+
+                    string loop = i.ToString();
+
+                    INST.IO = (IMessage)RM.Open(textBox_visaVNA.Text , AccessMode.NO_LOCK, 2000, "");
+                    INST.IO.Timeout = 5000;
+
+                    INST.IO.Clear();
+                    INST.WriteString(":SENS1:FREQ:SPAN " + "0E6", true);
+
+                    switch (i)
+                    {
+                        case 1:
+                            if (checkBox1.Checked == true)
+                            {
+                                System.Threading.Thread.Sleep(100);
+                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6", true);
+                                INST.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST.ReadString().Split(',');
+                                num = double.Parse(ReadResults[0], NumberStyles.Float);
+                                resultMK1 = num.ToString();
+                            }
+
+                            break;
+
+                        case 2:
+                            if (checkBox2.Checked == true)
+                            {
+                                System.Threading.Thread.Sleep(100);
+                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK2.Text + "E6", true);
+                                INST.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST.ReadString().Split(',');
+                                num = double.Parse(ReadResults[0], NumberStyles.Float);
+                                resultMK2 = num.ToString();
+                            }
+
+                            break;
+
+                        case 3:
+                            if (checkBox3.Checked == true)
+                            {
+                                System.Threading.Thread.Sleep(100);
+                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK3.Text + "E6", true);
+                                INST.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST.ReadString().Split(',');
+                                num = double.Parse(ReadResults[0], NumberStyles.Float);
+                                resultMK3 = num.ToString();
+                            }
+
+                            break;
+
+                        case 4:
+                            if (checkBox4.Checked == true)
+                            {
+                                System.Threading.Thread.Sleep(100);
+                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK4.Text + "E6", true);
+                                INST.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST.ReadString().Split(',');
+                                num = double.Parse(ReadResults[0], NumberStyles.Float);
+                                resultMK4 = num.ToString();
+                            }
+
+                            break;
+
+                        case 5:
+                            if (checkBox5.Checked == true)
+                            {
+                                System.Threading.Thread.Sleep(100);
+                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK5.Text + "E6", true);
+                                INST.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST.ReadString().Split(',');
+                                num = double.Parse(ReadResults[0], NumberStyles.Float);
+                                resultMK5 = num.ToString();
+                            }
+
+                            break;
+
+                        case 6:
+                            if (checkBox6.Checked == true)
+                            {
+                                System.Threading.Thread.Sleep(100);
+                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK6.Text + "E6", true);
+                                INST.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST.ReadString().Split(',');
+                                num = double.Parse(ReadResults[0], NumberStyles.Float);
+                                resultMK6 = num.ToString();
+                            }
+
+                            break;
+
+
+
+                    }
+
+                }
+            }
+
+            catch
+            {
+
+            }
+            finally
+            {
+                INST.IO.Close();
+            }
+
+            
+
+            string[] results = { textBox_MK1.Text, resultMK1, textBox_MK2.Text, resultMK2, textBox_MK3.Text, resultMK3,
+            textBox_MK4.Text, resultMK4, textBox_MK5.Text, resultMK5, textBox_MK6.Text, resultMK6};
+
+            StreamWriter prow = new StreamWriter(FileName, true, Encoding.Default);
+            for (int k = 0; k < results.Length; k++)
+            {
+                if (k == 0)
+                {
+                    TEXTDATA = results[k] + ",";
+                }
+                else
+                {
+                    TEXTDATA = TEXTDATA + results[k] + ",";
+                }
+
+            }
+            prow.WriteLine(TEXTDATA);
+            prow.Close();
+
+
+        }
+
         private void button_startMeas_Click(object sender, EventArgs e)
         {
 
@@ -405,14 +511,14 @@ namespace TurnTableTest
             if (checkBox_Hol.Checked == true)
             {
                 TESTPOL = "PH";
-                FileName = "C:\\resultH.csv";
+                FileName = "C:\\TEST\\patternH.csv";
                 TEST();
             }
 
             if (checkBox_Vel.Checked == true)
             {
                 TESTPOL = "PB";
-                FileName = "C:\\resultV.csv";
+                FileName = "C:\\TEST\\patternV.csv";
                 TEST();
             }
 
