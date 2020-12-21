@@ -19,13 +19,26 @@ namespace TurnTableTest
         private ResourceManager RM = new ResourceManager();
         private FormattedIO488 INST = new FormattedIO488();
 
-        // 測定間隔
-        int interval = 0;
-        int MeasPoint;
+        //VISA
+        string E5071C;
+        string Table;
+        string Tower;
+
+        //COMMAND
+        string SPD;
+        string POL;
+
+        //VALUE
+        string VFRQ;
+        string VSPN;
+        string VPOW;
+        string VPOINT;
+
+        int INTVAL = 0;
+        int MESPOINT;
 
         // アンテナ向き
         bool polarity = false;
-        string TESTPOL;
 
         //結果のファイル名
         string FileName;
@@ -33,10 +46,22 @@ namespace TurnTableTest
         public Form1()
         {
             InitializeComponent();
+
+            //VISA
+            E5071C = textBox_visaVNA.Text;
+            Table = textBox_visaTable.Text;
+            Tower = textBox_visaPol.Text;
+
+            VFRQ = textBox_FreqCenter.Text;
+            VSPN = textBox_FreqBandwidth.Text;
+            VPOW = textBox_Power.Text;
+            VPOINT = textBox_PointNum.Text;
+            
+
         }
         private void SETVISA()
         {
-            string[] VISA = { textBox_visaTable.Text, textBox_visaPol.Text, textBox_visaVNA.Text };
+            string[] VISA = { Table, Tower, E5071C };
             comboBox_visaList.Items.AddRange(VISA);
             comboBox_visaList.SelectedIndex = 2;
         }
@@ -45,6 +70,7 @@ namespace TurnTableTest
             string[] VELO = { "0.5", "0.75", "1.0", "1.5", "2.0" };
             comboBox_velo.Items.AddRange(VELO);
             comboBox_velo.SelectedIndex = 0;
+            SPD = "SPD00000.50";
         }
 
         private void DIVIDE()
@@ -52,6 +78,7 @@ namespace TurnTableTest
             string[] DIVE = { "1", "5", "10", "15" };
             comboBox_interval.Items.AddRange(DIVE);
             comboBox_interval.SelectedIndex = 0;
+            INTVAL = 1;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -62,21 +89,23 @@ namespace TurnTableTest
 
         }
 
+        //---------------------------------------------------------------------------
+
         private void button_VNASET_Click(object sender, EventArgs e)
         {
-            string FRQ = ":SENS1:FREQ:CENT " + textBox_FreqCenter.Text + "E6";
-            string SPN = ":SENS1:FREQ:SPAN " + textBox_FreqBandwidth.Text + "E6";
-            string PNT = ":SENS1:SWE:POIN " + textBox_PointNum.Text;
-            string POW = ":SOUR1:POW " + textBox_Power.Text;
+            string FRQ = ":SENS1:FREQ:CENT " + VFRQ + "E6";
+            string SPN = ":SENS1:FREQ:SPAN " + VSPN + "E6";
+            string POINT = ":SENS1:SWE:POIN " + VPOINT;
+            string POW = ":SOUR1:VPOW " + VPOW;
 
             try
             {
                 var session = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(textBox_visaVNA.Text);
+                Ivi.Visa.GlobalResourceManager.Open(E5071C);
 
                 session.FormattedIO.WriteLine(FRQ);
                 session.FormattedIO.WriteLine(SPN);
-                session.FormattedIO.WriteLine(PNT);
+                session.FormattedIO.WriteLine(POINT);
                 session.FormattedIO.WriteLine(POW);
                 session.Dispose();
                 session = null;
@@ -98,8 +127,10 @@ namespace TurnTableTest
             try
             {
                 var session = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(textBox_visaTable.Text);
+                Ivi.Visa.GlobalResourceManager.Open(Table);
 
+
+                session.FormattedIO.WriteLine("SPD00002.00");
                 session.FormattedIO.WriteLine("CP");
                 POSISTR = session.FormattedIO.ReadLine();
                 POSITION = double.Parse(POSISTR);
@@ -111,8 +142,8 @@ namespace TurnTableTest
                 }
 
                 DISTSTR = "CWP" + String.Format("00000.00", SPAN);
-
                 session.FormattedIO.WriteLine(DISTSTR);
+
                 while (POSISTR == textBox_Distination.Text)
                 {
                     session.FormattedIO.WriteLine("CP");
@@ -121,6 +152,7 @@ namespace TurnTableTest
                 }
 
                 session.FormattedIO.WriteLine("ST");
+                session.FormattedIO.WriteLine(SPD);
                 session.Dispose();
                 session = null;
             }
@@ -160,7 +192,7 @@ namespace TurnTableTest
 
         private void button_SetTable_Click(object sender, EventArgs e)
         {
-            string SPD = "SPD00000.00";
+            SPD = "SPD00000.00";
             try
             {
 
@@ -187,24 +219,24 @@ namespace TurnTableTest
                 switch (comboBox_interval.SelectedIndex)
                 {
                     case 0:
-                        interval = 1;
+                        INTVAL = 1;
                         break;
                     case 1:
-                        interval = 5;
+                        INTVAL = 5;
                         break;
                     case 2:
-                        interval = 10;
+                        INTVAL = 10;
                         break;
                     case 3:
-                        interval = 15;
+                        INTVAL = 15;
                         break;
 
                 }
 
-                MeasPoint = 360 / interval;
+                MESPOINT = 360 / INTVAL;
 
                 var session = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(textBox_visaTable.Text);
+                Ivi.Visa.GlobalResourceManager.Open(Table);
 
                 session.FormattedIO.WriteLine(SPD);
 
@@ -219,7 +251,6 @@ namespace TurnTableTest
 
         private void button_SetPol_Click(object sender, EventArgs e)
         {
-            string POL;
 
             if (polarity == false)
             {
@@ -237,7 +268,7 @@ namespace TurnTableTest
           try
             {
                 var session = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(textBox_visaPol.Text);
+                Ivi.Visa.GlobalResourceManager.Open(Tower);
 
                 session.FormattedIO.WriteLine(POL);
 
@@ -258,19 +289,19 @@ namespace TurnTableTest
             try
             {   //偏波
                 var session_POL = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(textBox_visaPol.Text);
-                session_POL.FormattedIO.WriteLine(TESTPOL);
+                Ivi.Visa.GlobalResourceManager.Open(Tower);
+                session_POL.FormattedIO.WriteLine(POL);
                 session_POL.Dispose();
                 session_POL = null;
 
-                string SPN = ":SENS1:FREQ:SPAN 0E6";
+                string VSPN = ":SENS1:FREQ:SPAN 0E6";
                 string MK = ":CALC1:MARK1 ON";
 
 
                 //VNAセット
                 var session_VNA = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(textBox_visaVNA.Text);
-                session_VNA.FormattedIO.WriteLine(SPN);
+                Ivi.Visa.GlobalResourceManager.Open(E5071C);
+                session_VNA.FormattedIO.WriteLine(VSPN);
                 session_VNA.FormattedIO.WriteLine(MK);
 
                 session_VNA.Dispose();
@@ -282,7 +313,7 @@ namespace TurnTableTest
 
                 //回転台接続開始
                 var session_turn = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(textBox_visaTable.Text);
+                Ivi.Visa.GlobalResourceManager.Open(Table);
                 session_turn.FormattedIO.WriteLine("DL0");
                 session_turn.FormattedIO.WriteLine("S1");
                 session_turn.FormattedIO.WriteLine("HD0");
@@ -323,7 +354,7 @@ namespace TurnTableTest
                 } while (CPOS < 1.0 || CPOS > 359.0);
 
                 //測定開始
-                for(int i = 0; i < MeasPoint; i++)
+                for(int i = 0; i < MESPOINT; i++)
                 {
                     do
                     {
@@ -332,17 +363,17 @@ namespace TurnTableTest
                         textBox_Angle.Text = AG;
                         CPOS = double.Parse(AG);
 
-                        if (Math.Abs(i * interval - CPOS) <= 0.2)
+                        if (Math.Abs(i * INTVAL - CPOS) <= 0.2)
                         {
                             VNAMEAS();
                         }
 
-                        if(Math.Abs(i * interval - CPOS) > 2)
+                        if(Math.Abs(i * INTVAL - CPOS) > 2)
                         {
                             break;
                         }
                     }
-                    while (CPOS > i * interval);
+                    while (CPOS > i * INTVAL);
                 }
 
                 session_turn.Dispose();
@@ -378,7 +409,7 @@ namespace TurnTableTest
 
                     string loop = i.ToString();
 
-                    INST.IO = (IMessage)RM.Open(textBox_visaVNA.Text , AccessMode.NO_LOCK, 2000, "");
+                    INST.IO = (IMessage)RM.Open(E5071C , AccessMode.NO_LOCK, 2000, "");
                     INST.IO.Timeout = 5000;
 
                     INST.IO.Clear();
@@ -510,14 +541,14 @@ namespace TurnTableTest
             //回転回数　1回か2回かを判定
             if (checkBox_Hol.Checked == true)
             {
-                TESTPOL = "PH";
+                POL = "PH";
                 FileName = "C:\\TEST\\patternH.csv";
                 TEST();
             }
 
             if (checkBox_Vel.Checked == true)
             {
-                TESTPOL = "PB";
+                POL = "PB";
                 FileName = "C:\\TEST\\patternV.csv";
                 TEST();
             }
