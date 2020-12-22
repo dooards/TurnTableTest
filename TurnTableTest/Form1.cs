@@ -287,25 +287,26 @@ namespace TurnTableTest
             double CPOS;
             
             try
-            {   //偏波
-                var session_POL = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(Tower);
-                session_POL.FormattedIO.WriteLine(POL);
-                session_POL.Dispose();
-                session_POL = null;
+            {
+                //偏波
+                //var session_POL = (Ivi.Visa.IMessageBasedSession)
+                //Ivi.Visa.GlobalResourceManager.Open(Tower);
+                //session_POL.FormattedIO.WriteLine(POL);
+                //session_POL.Dispose();
+                //session_POL = null;
 
-                string VSPN = ":SENS1:FREQ:SPAN 0E6";
-                string MK = ":CALC1:MARK1 ON";
+                //string VSPN = ":SENS1:FREQ:SPAN 0E6";
+                //string MK = ":CALC1:MARK1 ON";
 
 
-                //VNAセット
-                var session_VNA = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(E5071C);
-                session_VNA.FormattedIO.WriteLine(VSPN);
-                session_VNA.FormattedIO.WriteLine(MK);
+                ////VNAセット
+                //var session_VNA = (Ivi.Visa.IMessageBasedSession)
+                //Ivi.Visa.GlobalResourceManager.Open(E5071C);
+                //session_VNA.FormattedIO.WriteLine(VSPN);
+                //session_VNA.FormattedIO.WriteLine(MK);
 
-                session_VNA.Dispose();
-                session_VNA = null;
+                //session_VNA.Dispose();
+                //session_VNA = null;
 
 
                 //回転台初期値セット
@@ -365,10 +366,14 @@ namespace TurnTableTest
 
                         if (Math.Abs(i * INTVAL - CPOS) <= 0.2)
                         {
-                            VNAMEAS();
+                            StreamWriter prow = new StreamWriter(FileName, true, Encoding.Default);
+
+                            prow.WriteLine(AG);
+                            prow.Close();
+
                         }
 
-                        if(Math.Abs(i * INTVAL - CPOS) > 2)
+                        if (Math.Abs(i * INTVAL - CPOS) > 2)
                         {
                             break;
                         }
