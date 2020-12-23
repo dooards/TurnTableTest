@@ -67,8 +67,6 @@
             this.comboBox_interval = new System.Windows.Forms.ComboBox();
             this.label11 = new System.Windows.Forms.Label();
             this.comboBox_velo = new System.Windows.Forms.ComboBox();
-            this.button_SetTable = new System.Windows.Forms.Button();
-            this.button_Move = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.textBox_Distination = new System.Windows.Forms.TextBox();
@@ -421,8 +419,6 @@
             this.groupBox3.Controls.Add(this.comboBox_interval);
             this.groupBox3.Controls.Add(this.label11);
             this.groupBox3.Controls.Add(this.comboBox_velo);
-            this.groupBox3.Controls.Add(this.button_SetTable);
-            this.groupBox3.Controls.Add(this.button_Move);
             this.groupBox3.Controls.Add(this.label8);
             this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Controls.Add(this.textBox_Distination);
@@ -436,9 +432,9 @@
             // 
             // button_Move2
             // 
-            this.button_Move2.Location = new System.Drawing.Point(190, 57);
+            this.button_Move2.Location = new System.Drawing.Point(189, 18);
             this.button_Move2.Name = "button_Move2";
-            this.button_Move2.Size = new System.Drawing.Size(100, 26);
+            this.button_Move2.Size = new System.Drawing.Size(100, 23);
             this.button_Move2.TabIndex = 30;
             this.button_Move2.Text = "GO";
             this.button_Move2.UseVisualStyleBackColor = true;
@@ -458,6 +454,7 @@
             this.comboBox_interval.Name = "comboBox_interval";
             this.comboBox_interval.Size = new System.Drawing.Size(112, 20);
             this.comboBox_interval.TabIndex = 29;
+            this.comboBox_interval.SelectedIndexChanged += new System.EventHandler(this.comboBox_interval_SelectedIndexChanged);
             // 
             // label11
             // 
@@ -475,26 +472,7 @@
             this.comboBox_velo.Name = "comboBox_velo";
             this.comboBox_velo.Size = new System.Drawing.Size(112, 20);
             this.comboBox_velo.TabIndex = 11;
-            // 
-            // button_SetTable
-            // 
-            this.button_SetTable.Location = new System.Drawing.Point(190, 93);
-            this.button_SetTable.Name = "button_SetTable";
-            this.button_SetTable.Size = new System.Drawing.Size(100, 26);
-            this.button_SetTable.TabIndex = 28;
-            this.button_SetTable.Text = "SET";
-            this.button_SetTable.UseVisualStyleBackColor = true;
-            this.button_SetTable.Click += new System.EventHandler(this.button_SetTable_Click);
-            // 
-            // button_Move
-            // 
-            this.button_Move.Location = new System.Drawing.Point(190, 18);
-            this.button_Move.Name = "button_Move";
-            this.button_Move.Size = new System.Drawing.Size(100, 26);
-            this.button_Move.TabIndex = 27;
-            this.button_Move.Text = "GO";
-            this.button_Move.UseVisualStyleBackColor = true;
-            this.button_Move.Click += new System.EventHandler(this.button_Move_Click);
+            this.comboBox_velo.SelectedIndexChanged += new System.EventHandler(this.comboBox_velo_SelectedIndexChanged);
             // 
             // label8
             // 
@@ -764,8 +742,6 @@
         private System.Windows.Forms.TextBox textBox_MK2;
         private System.Windows.Forms.TextBox textBox_MK3;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.Button button_SetTable;
-        private System.Windows.Forms.Button button_Move;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox textBox_Distination;

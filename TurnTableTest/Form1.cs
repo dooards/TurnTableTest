@@ -18,6 +18,8 @@ namespace TurnTableTest
     {
         private ResourceManager RM = new ResourceManager();
         private FormattedIO488 INST_Table = new FormattedIO488();
+        
+
 
         //VISA
         string E5071C;
@@ -36,6 +38,7 @@ namespace TurnTableTest
 
         int INTVAL = 0;
         int MESPOINT;
+        int MESPOS;
 
         // アンテナ向き
         bool polarity = false;
@@ -46,6 +49,8 @@ namespace TurnTableTest
 
         //結果のファイル名
         string FileName = "C:\\TEST\\test.csv";
+
+        StreamWriter prow = new StreamWriter("C:\\TEST\\test.csv", true, Encoding.Default);
 
         public Form1()
         {
@@ -62,12 +67,13 @@ namespace TurnTableTest
             VPOINT = textBox_PointNum.Text;
 
             DISTSTR = String.Format("{0:00000.00}", double.Parse(textBox_Distination.Text));
+
         }
         private void SETVISA()
         {
             string[] VISA = { Table, Tower, E5071C };
             comboBox_visaList.Items.AddRange(VISA);
-            comboBox_visaList.SelectedIndex = 2;
+            comboBox_visaList.SelectedIndex = 0;
         }
         private void SETVELO()
         {
@@ -121,58 +127,7 @@ namespace TurnTableTest
 
         }
 
-        private void button_Move_Click(object sender, EventArgs e)
-        {
-            double POSITION;
-            double DISTINATION = double.Parse(textBox_Distination.Text);
-            double SPAN;
-            string DISTCOMMAND, POSISTR;
-            string DISSTR = String.Format("{0:00000.00}", DISTINATION);
 
-            //try
-            {
-                var session = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(Table);
-
-
-                session.FormattedIO.WriteLine("SPD00002.00");
-                session.FormattedIO.WriteLine("CP");
-                POSISTR = session.FormattedIO.ReadLine();
-                POSISTR = POSISTR.Substring(0,8);
-                POSITION = double.Parse(POSISTR);
-
-                //		POSISTR	"00000.00,0\r\r"	string
-
-
-                SPAN = DISTINATION - POSITION;
-                if (SPAN < 0)
-                {
-                    SPAN = SPAN + 360;
-                }
-
-                DISTCOMMAND = "CWP" + String.Format("{0:00000.00}", SPAN);
-                session.FormattedIO.WriteLine(DISTCOMMAND);
-
-                while (DISSTR != POSISTR)
-                {
-                    session.FormattedIO.WriteLine("CP");
-                    POSISTR = session.FormattedIO.ReadLine();
-                    POSISTR = POSISTR.Substring(0, 8);
-                    textBox_Angle.Text = POSISTR;
-                    textBox_Angle.Update();
-                }
-
-                session.FormattedIO.WriteLine("ST");
-                session.FormattedIO.WriteLine(SPD);
-                session.Dispose();
-                session = null;
-            }
-            //catch
-            //{
-
-            //}
-
-        }
 
         private async void button_Move2_Click(object sender, EventArgs e)
         {
@@ -180,13 +135,14 @@ namespace TurnTableTest
             double DISTINATION;
             double SPAN;
             string DISTCOMMAND;
+
             
             try
             {
                 INST_Table.IO.Clear();
                 INST_Table.WriteString("SPD00002.00");
                 INST_Table.WriteString("CP");
-                CPOS = INST_Table.ReadString();
+                CPOS = INST_Table.ReadString().Substring(0, 8);
                 POSITION = double.Parse(CPOS.Substring(0, 8));
                 DISTINATION = double.Parse(textBox_Distination.Text);
 
@@ -198,15 +154,27 @@ namespace TurnTableTest
                 {
                     SPAN = SPAN + 360;
                 }
+                else if(SPAN == 0)
+                {
+                    return;
+                }
 
                 DISTCOMMAND = "CWP" + String.Format("{0:00000.00}", SPAN);
                 INST_Table.WriteString(DISTCOMMAND);
                 
-                while(DISTSTR != CPOS)
+
+                do
                 {
                     await Task.Run(() => readposition());
-                }
-                
+                    textBox_Angle.Text = CPOS;
+
+
+                } while (DISTSTR != CPOS);
+
+                INST_Table.WriteString(SPD);
+
+
+
             }
             catch (Exception ex)
             {
@@ -219,8 +187,7 @@ namespace TurnTableTest
             try
             {
                 INST_Table.WriteString("CP");
-                CPOS = INST_Table.ReadString();
-                textBox_Angle.Text = CPOS;
+                CPOS = INST_Table.ReadString().Substring(0, 8);
 
             }
             catch (Exception ex)
@@ -228,6 +195,8 @@ namespace TurnTableTest
                 MessageBox.Show(ex.Message);
             }
         }
+
+        //--------------------------------------------------------------------------
 
         private void button_SETVISA_Click(object sender, EventArgs e)
         {
@@ -256,72 +225,6 @@ namespace TurnTableTest
             }
         }
 
-        private void button_SetTable_Click(object sender, EventArgs e)
-        {
-            //string POSISTR;
-
-            try
-            {
-
-                switch (comboBox_velo.SelectedIndex)
-                {
-                    case 0:
-                        SPD = "SPD00000.50";
-                        break;
-                    case 1:
-                        SPD = "SPD00000.75";
-                        break;
-                    case 2:
-                        SPD = "SPD00001.00";
-                        break;
-                    case 3:
-                        SPD = "SPD00001.50";
-                        break;
-                    case 4:
-                        SPD = "SPD00002.00";
-                        break;
-
-                }
-
-                switch (comboBox_interval.SelectedIndex)
-                {
-                    case 0:
-                        INTVAL = 1;
-                        break;
-                    case 1:
-                        INTVAL = 5;
-                        break;
-                    case 2:
-                        INTVAL = 10;
-                        break;
-                    case 3:
-                        INTVAL = 15;
-                        break;
-
-                }
-
-                MESPOINT = 360 / INTVAL;
-
-                //var session = (Ivi.Visa.IMessageBasedSession)
-                //Ivi.Visa.GlobalResourceManager.Open(Table);
-
-
-                //session.FormattedIO.WriteLine("CP");
-                //POSISTR = session.FormattedIO.ReadLine();
-                //POSISTR = POSISTR.Substring(0, 8);
-                //textBox_Angle.Text = POSISTR;
-                //textBox_Angle.Update();
-
-                INST_Table.WriteString(SPD);
-                //session.FormattedIO.WriteLine(SPD);
-                //session.Dispose();
-                //session = null;
-            }
-            catch
-            {
-
-            }
-        }
 
         private void button_SetPol_Click(object sender, EventArgs e)
         {
@@ -356,137 +259,7 @@ namespace TurnTableTest
         }
 
 
-        private void TEST()
-        {
-            double CPOS;
-            
-            try
-            {
 
-                StreamWriter prow = new StreamWriter(FileName, true, Encoding.Default);
-
-
-                //偏波
-                //var session_POL = (Ivi.Visa.IMessageBasedSession)
-                //Ivi.Visa.GlobalResourceManager.Open(Tower);
-                //session_POL.FormattedIO.WriteLine(POL);
-                //session_POL.Dispose();
-                //session_POL = null;
-
-                //string VSPN = ":SENS1:FREQ:SPAN 0E6";
-                //string MK = ":CALC1:MARK1 ON";
-
-
-                ////VNAセット
-                //var session_VNA = (Ivi.Visa.IMessageBasedSession)
-                //Ivi.Visa.GlobalResourceManager.Open(E5071C);
-                //session_VNA.FormattedIO.WriteLine(VSPN);
-                //session_VNA.FormattedIO.WriteLine(MK);
-
-                //session_VNA.Dispose();
-                //session_VNA = null;
-
-
-                //回転台初期値セット
-                this.button_SetTable.PerformClick();
-
-                //回転台接続開始
-                var session_turn = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(Table);
-                session_turn.FormattedIO.WriteLine("DL0");
-                session_turn.FormattedIO.WriteLine("S1");
-                session_turn.FormattedIO.WriteLine("HD0");
-                session_turn.FormattedIO.WriteLine("VL1");
-                session_turn.FormattedIO.WriteLine("M0");
-                session_turn.FormattedIO.WriteLine("CP");
-
-                //0位置移動
-                string AG = session_turn.FormattedIO.ReadLine();
-                AG = AG.Substring(0, 8);
-
-                if (AG != "00000.00")
-                {
-                    textBox_Distination.Text = "0";
-                    this.button_Move.PerformClick();
-
-                }
-
-                //逆回転
-                session_turn.FormattedIO.WriteLine("CCP00010.00");
-                do
-                {
-                    session_turn.FormattedIO.WriteLine("CP");
-                    AG = session_turn.FormattedIO.ReadLine();
-                    AG = AG.Substring(0, 8);
-                    textBox_Angle.Text = AG;
-                    textBox_Angle.Update();
-
-                } while (AG != "00350.00");
-                //session_turn.FormattedIO.WriteLine("ST");
-
-                //回転開始
-                session_turn.FormattedIO.WriteLine("CWP00370.00");
-                do
-                {
-                    session_turn.FormattedIO.WriteLine("CP");
-                    AG = session_turn.FormattedIO.ReadLine();
-                    AG = AG.Substring(0, 8);
-                    textBox_Angle.Text = AG;
-                    textBox_Angle.Update();
-                    CPOS = double.Parse(AG);
-
-                } while (CPOS < 359.5);
-
-               
-
-
-                //測定開始
-                for (int i = 0; i < MESPOINT+1; i++)
-                {
-                   
-
-                    do
-                    {
-                        session_turn.FormattedIO.WriteLine("CP");
-                        AG = session_turn.FormattedIO.ReadLine().Substring(0,8);
-                        //AG = AG.Substring(0, 8);
-                        //textBox_Angle.Text = AG;
-                        //textBox_Angle.Update();
-                        CPOS = double.Parse(AG);
-
-                        if (CPOS==(i * INTVAL))//(Math.Abs(i*INTVAL-CPOS) < 0.02)
-                        {
-                           
-                            String results =  i.ToString()+ ","+ AG ;
-                            prow.WriteLine(results);
-
-                            break;
-
-                        }
-
-                        //if (Math.Abs(i * INTVAL - CPOS) > 30)
-                        //{
-                        //    return;
-                        //}
-                    }
-                    while (CPOS > 359.05 | CPOS < (i+1)* INTVAL | i < MESPOINT) ; //(CPOS > i * INTVAL);
-
-                    
-                }
-
-                prow.Close();
-
-                session_turn.Dispose();
-                session_turn = null;
-
-            }
-            catch
-            {
-
-            }
-
-
-        }
 
         private void VNAMEAS()
         {
@@ -638,32 +411,168 @@ namespace TurnTableTest
         private void button_startMeas_Click(object sender, EventArgs e)
         {
 
-            //回転回数　1回か2回かを判定
-            if (checkBox_Hol.Checked == true)
-            {
-                POL = "PH";
-               // FileName = "C:\\TEST\\patternH.csv";
-                TEST();
-            }
+             TEST();
 
-            if (checkBox_Vel.Checked == true)
-            {
-                POL = "PB";
-               // FileName = "C:\\TEST\\patternV.csv";
-                TEST();
-            }
-
-  
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
+            if(prow != null)
+            {
+                prow.Close();
+            }
             Application.Exit();
         }
 
-        private void button_startTest_Click(object sender, EventArgs e)
+        private async void button_startTest_Click(object sender, EventArgs e)
         {
 
+            try
+            {
+                INST_Table.WriteString("DL0");
+                INST_Table.WriteString("S1");
+                INST_Table.WriteString("HD0");
+                INST_Table.WriteString("VL1");
+                INST_Table.WriteString("M0");
+                INST_Table.WriteString("CP");
+                CPOS = INST_Table.ReadString().Substring(0, 8);
+
+                //0位置移動
+                if (CPOS != "00000.00")
+                {
+                    textBox_Distination.Text = "0";
+                    this.button_Move2.PerformClick();
+                }
+
+
+                //逆回転
+                INST_Table.WriteString("CCP00010.00");
+                do
+                {
+                    await Task.Run(() => readposition());
+                    textBox_Angle.Text = CPOS;
+
+                } while (CPOS != "00350.00");
+
+
+                //回転開始
+                INST_Table.WriteString("CWP00370.00");
+
+
+                for (MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
+                {
+                    await Task.Run(() => readposition2());
+                    textBox_Angle.Text = CPOS;
+
+                }
+
+                MessageBox.Show("TEST END");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+
+
+        }
+
+        public void readposition2()
+        {
+            try
+            {
+                do
+                {
+                    INST_Table.WriteString("CP");
+                    CPOS = INST_Table.ReadString().Substring(0, 8);
+                    Console.WriteLine(CPOS);
+
+                } while (Math.Abs(double.Parse(CPOS) - MESPOS) > 0.1);
+
+                prow.WriteLine(CPOS);
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
+        private async void TEST()
+        {
+
+            try
+            {
+                INST_Table.WriteString("DL0");
+                INST_Table.WriteString("S1");
+                INST_Table.WriteString("HD0");
+                INST_Table.WriteString("VL1");
+                INST_Table.WriteString("M0");
+                INST_Table.WriteString("CP");
+                CPOS = INST_Table.ReadString().Substring(0, 8);
+
+                //0位置移動
+                if (CPOS != "00000.00")
+                {
+                    textBox_Distination.Text = "0";
+                    this.button_Move2.PerformClick();
+                }
+
+
+                //逆回転
+                INST_Table.WriteString("CCP00010.00");
+                do
+                {
+                    await Task.Run(() => readposition());
+                    textBox_Angle.Text = CPOS;
+
+                } while (CPOS != "00350.00");
+
+
+                //回転開始
+                INST_Table.WriteString("CWP00370.00");
+
+
+                //for (MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
+                //{
+                //    Task<string> t1 = Task.Run(() => { return AsyncWork1(); });
+                //    await Task.Run(() => readposition2());
+                //    textBox_Angle.Text = t1.Result;
+
+                //}
+
+                do
+                {
+                    Task<string> t1 = Task.Run(() => { return AsyncWork1(); });
+                    //await Task.Run(() => readposition2());
+                    textBox_Angle.Text = t1.Result;
+                } while (Math.Abs(double.Parse(CPOS) - 349) > 0.1);
+
+                MessageBox.Show("TEST END");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+        }
+
+        public string AsyncWork1()
+        {
+
+                //do
+                //{
+                    INST_Table.WriteString("CP");
+                    CPOS = INST_Table.ReadString().Substring(0, 8);
+                //    Console.WriteLine(CPOS);
+
+                //} while (Math.Abs(double.Parse(CPOS) - MESPOS) > 0.1);
+
+                prow.WriteLine(CPOS);
+                return CPOS;
+
+            
         }
 
         private void button_Table_Click(object sender, EventArgs e)
@@ -676,7 +585,10 @@ namespace TurnTableTest
             }
             else
             {
+                INST_Table.IO.Clear();
                 INST_Table.IO.Close();
+                INST_Table.IO = null;
+               
                 button_Table.Text = "Table ON";
             }
             
@@ -686,6 +598,55 @@ namespace TurnTableTest
         private void textBox_Distination_TextChanged(object sender, EventArgs e)
         {
             DISTSTR = String.Format("{0:00000.00}", double.Parse(textBox_Distination.Text));
+        }
+
+        private void comboBox_velo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBox_velo.SelectedIndex)
+            {
+                case 0:
+                    SPD = "SPD00000.50";
+                    break;
+                case 1:
+                    SPD = "SPD00000.75";
+                    break;
+                case 2:
+                    SPD = "SPD00001.00";
+                    break;
+                case 3:
+                    SPD = "SPD00001.50";
+                    break;
+                case 4:
+                    SPD = "SPD00002.00";
+                    break;
+
+            }
+            Console.WriteLine(SPD);
+        }
+
+        private void comboBox_interval_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBox_interval.SelectedIndex)
+            {
+                case 0:
+                    INTVAL = 1;
+                    break;
+                case 1:
+                    INTVAL = 5;
+                    break;
+                case 2:
+                    INTVAL = 10;
+                    break;
+                case 3:
+                    INTVAL = 15;
+                    break;
+
+            }
+
+            MESPOINT = 360 / INTVAL;
+
+            Console.WriteLine(INTVAL);
+            Console.WriteLine(MESPOINT);
         }
     }
 }
