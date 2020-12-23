@@ -463,6 +463,7 @@ namespace TurnTableTest
                 {
                     await Task.Run(() => readposition2());
                     textBox_Angle.Text = CPOS;
+                    
 
                 }
 
@@ -479,6 +480,8 @@ namespace TurnTableTest
 
         public void readposition2()
         {
+            double temp;
+
             try
             {
                 do
@@ -487,7 +490,15 @@ namespace TurnTableTest
                     CPOS = INST_Table.ReadString().Substring(0, 8);
                     Console.WriteLine(CPOS);
 
-                } while (Math.Abs(double.Parse(CPOS) - MESPOS) > 0.1);
+                    temp = Math.Abs(double.Parse(CPOS) - MESPOS);
+
+                    if(temp > 1)
+                    {
+                        MESPOS = MESPOINT;
+                        return;
+                    }
+
+                } while (temp > 0.1);
 
                 prow.WriteLine(CPOS);
                 
@@ -534,20 +545,15 @@ namespace TurnTableTest
                 INST_Table.WriteString("CWP00370.00");
 
 
-                //for (MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
-                //{
-                //    Task<string> t1 = Task.Run(() => { return AsyncWork1(); });
-                //    await Task.Run(() => readposition2());
-                //    textBox_Angle.Text = t1.Result;
-
-                //}
-
-                do
+                for (MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
                 {
-                    Task<string> t1 = Task.Run(() => { return AsyncWork1(); });
-                    //await Task.Run(() => readposition2());
-                    textBox_Angle.Text = t1.Result;
-                } while (Math.Abs(double.Parse(CPOS) - 349) > 0.1);
+                    await Task.Run(() => readposition2());
+                    //Task<string> t1 = Task.Run(() => { return AsyncWork1(); });
+                    Task t = Task.Run(() => { AsyncWork(); });
+                    //textBox_Angle.Text = t1.Result;
+                    textBox_Angle.Text = CPOS;
+
+                }
 
                 MessageBox.Show("TEST END");
             }
@@ -558,21 +564,40 @@ namespace TurnTableTest
 
         }
 
+        public void AsyncWork()
+        {
+            INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6", true);
+            INST_Table.WriteString(":CALC1:MARK1:Y?");
+            String[] ReadResults = INST_Table.ReadString().Split(',');
+            double num = double.Parse(ReadResults[0], NumberStyles.Float);
+            string resultMK1 = num.ToString();
+        }
+
+
         public string AsyncWork1()
         {
 
-                //do
-                //{
-                    INST_Table.WriteString("CP");
-                    CPOS = INST_Table.ReadString().Substring(0, 8);
-                //    Console.WriteLine(CPOS);
+            double temp;
 
-                //} while (Math.Abs(double.Parse(CPOS) - MESPOS) > 0.1);
+            do
+            {
+                INST_Table.WriteString("CP");
+                CPOS = INST_Table.ReadString().Substring(0, 8);
+                Console.WriteLine(CPOS);
 
-                prow.WriteLine(CPOS);
-                return CPOS;
+                temp = Math.Abs(double.Parse(CPOS) - MESPOS);
 
-            
+                if (temp > 1)
+                {
+                    MESPOS = MESPOINT;
+                    return CPOS;
+                }
+
+            } while (temp > 0.1);
+
+            prow.WriteLine(CPOS);
+            return CPOS;
+
         }
 
         private void button_Table_Click(object sender, EventArgs e)
