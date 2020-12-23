@@ -17,7 +17,7 @@ namespace TurnTableTest
     public partial class Form1 : Form
     {
         private ResourceManager RM = new ResourceManager();
-        private FormattedIO488 INST = new FormattedIO488();
+        private FormattedIO488 INST_Table = new FormattedIO488();
 
         //VISA
         string E5071C;
@@ -40,6 +40,10 @@ namespace TurnTableTest
         // アンテナ向き
         bool polarity = false;
 
+        //Table position
+        string DISTSTR; //distination
+        string CPOS;
+
         //結果のファイル名
         string FileName = "C:\\TEST\\test.csv";
 
@@ -56,8 +60,8 @@ namespace TurnTableTest
             VSPN = textBox_FreqBandwidth.Text;
             VPOW = textBox_Power.Text;
             VPOINT = textBox_PointNum.Text;
-            
 
+            DISTSTR = String.Format("{0:00000.00}", double.Parse(textBox_Distination.Text));
         }
         private void SETVISA()
         {
@@ -123,7 +127,7 @@ namespace TurnTableTest
             double DISTINATION = double.Parse(textBox_Distination.Text);
             double SPAN;
             string DISTCOMMAND, POSISTR;
-            string DISTSTR = String.Format("{0:00000.00}", DISTINATION);
+            string DISSTR = String.Format("{0:00000.00}", DISTINATION);
 
             //try
             {
@@ -149,7 +153,7 @@ namespace TurnTableTest
                 DISTCOMMAND = "CWP" + String.Format("{0:00000.00}", SPAN);
                 session.FormattedIO.WriteLine(DISTCOMMAND);
 
-                while (DISTSTR != POSISTR)
+                while (DISSTR != POSISTR)
                 {
                     session.FormattedIO.WriteLine("CP");
                     POSISTR = session.FormattedIO.ReadLine();
@@ -168,6 +172,61 @@ namespace TurnTableTest
 
             //}
 
+        }
+
+        private async void button_Move2_Click(object sender, EventArgs e)
+        {
+            double POSITION;
+            double DISTINATION;
+            double SPAN;
+            string DISTCOMMAND;
+            
+            try
+            {
+                INST_Table.IO.Clear();
+                INST_Table.WriteString("SPD00002.00");
+                INST_Table.WriteString("CP");
+                CPOS = INST_Table.ReadString();
+                POSITION = double.Parse(CPOS.Substring(0, 8));
+                DISTINATION = double.Parse(textBox_Distination.Text);
+
+                //		POSISTR	"00000.00,0\r\r"	string
+
+
+                SPAN = DISTINATION - POSITION;
+                if (SPAN < 0)
+                {
+                    SPAN = SPAN + 360;
+                }
+
+                DISTCOMMAND = "CWP" + String.Format("{0:00000.00}", SPAN);
+                INST_Table.WriteString(DISTCOMMAND);
+                
+                while(DISTSTR != CPOS)
+                {
+                    await Task.Run(() => readposition());
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void readposition()
+        {
+            try
+            {
+                INST_Table.WriteString("CP");
+                CPOS = INST_Table.ReadString();
+                textBox_Angle.Text = CPOS;
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void button_SETVISA_Click(object sender, EventArgs e)
@@ -199,7 +258,7 @@ namespace TurnTableTest
 
         private void button_SetTable_Click(object sender, EventArgs e)
         {
-            string POSISTR;
+            //string POSISTR;
 
             try
             {
@@ -243,19 +302,20 @@ namespace TurnTableTest
 
                 MESPOINT = 360 / INTVAL;
 
-                var session = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(Table);
+                //var session = (Ivi.Visa.IMessageBasedSession)
+                //Ivi.Visa.GlobalResourceManager.Open(Table);
 
 
-                session.FormattedIO.WriteLine("CP");
-                POSISTR = session.FormattedIO.ReadLine();
-                POSISTR = POSISTR.Substring(0, 8);
-                textBox_Angle.Text = POSISTR;
-                textBox_Angle.Update();
+                //session.FormattedIO.WriteLine("CP");
+                //POSISTR = session.FormattedIO.ReadLine();
+                //POSISTR = POSISTR.Substring(0, 8);
+                //textBox_Angle.Text = POSISTR;
+                //textBox_Angle.Update();
 
-                session.FormattedIO.WriteLine(SPD);
-                session.Dispose();
-                session = null;
+                INST_Table.WriteString(SPD);
+                //session.FormattedIO.WriteLine(SPD);
+                //session.Dispose();
+                //session = null;
             }
             catch
             {
@@ -449,11 +509,11 @@ namespace TurnTableTest
 
                     string loop = i.ToString();
 
-                    INST.IO = (IMessage)RM.Open(E5071C , AccessMode.NO_LOCK, 2000, "");
-                    INST.IO.Timeout = 5000;
+                    INST_Table.IO = (IMessage)RM.Open(E5071C , AccessMode.NO_LOCK, 2000, "");
+                    INST_Table.IO.Timeout = 5000;
 
-                    INST.IO.Clear();
-                    INST.WriteString(":SENS1:FREQ:SPAN " + "0E6", true);
+                    INST_Table.IO.Clear();
+                    INST_Table.WriteString(":SENS1:FREQ:SPAN " + "0E6", true);
 
                     switch (i)
                     {
@@ -461,9 +521,9 @@ namespace TurnTableTest
                             if (checkBox1.Checked == true)
                             {
                                 System.Threading.Thread.Sleep(100);
-                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6", true);
-                                INST.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST.ReadString().Split(',');
+                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6", true);
+                                INST_Table.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST_Table.ReadString().Split(',');
                                 num = double.Parse(ReadResults[0], NumberStyles.Float);
                                 resultMK1 = num.ToString();
                             }
@@ -474,9 +534,9 @@ namespace TurnTableTest
                             if (checkBox2.Checked == true)
                             {
                                 System.Threading.Thread.Sleep(100);
-                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK2.Text + "E6", true);
-                                INST.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST.ReadString().Split(',');
+                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK2.Text + "E6", true);
+                                INST_Table.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST_Table.ReadString().Split(',');
                                 num = double.Parse(ReadResults[0], NumberStyles.Float);
                                 resultMK2 = num.ToString();
                             }
@@ -487,9 +547,9 @@ namespace TurnTableTest
                             if (checkBox3.Checked == true)
                             {
                                 System.Threading.Thread.Sleep(100);
-                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK3.Text + "E6", true);
-                                INST.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST.ReadString().Split(',');
+                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK3.Text + "E6", true);
+                                INST_Table.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST_Table.ReadString().Split(',');
                                 num = double.Parse(ReadResults[0], NumberStyles.Float);
                                 resultMK3 = num.ToString();
                             }
@@ -500,9 +560,9 @@ namespace TurnTableTest
                             if (checkBox4.Checked == true)
                             {
                                 System.Threading.Thread.Sleep(100);
-                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK4.Text + "E6", true);
-                                INST.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST.ReadString().Split(',');
+                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK4.Text + "E6", true);
+                                INST_Table.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST_Table.ReadString().Split(',');
                                 num = double.Parse(ReadResults[0], NumberStyles.Float);
                                 resultMK4 = num.ToString();
                             }
@@ -513,9 +573,9 @@ namespace TurnTableTest
                             if (checkBox5.Checked == true)
                             {
                                 System.Threading.Thread.Sleep(100);
-                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK5.Text + "E6", true);
-                                INST.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST.ReadString().Split(',');
+                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK5.Text + "E6", true);
+                                INST_Table.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST_Table.ReadString().Split(',');
                                 num = double.Parse(ReadResults[0], NumberStyles.Float);
                                 resultMK5 = num.ToString();
                             }
@@ -526,9 +586,9 @@ namespace TurnTableTest
                             if (checkBox6.Checked == true)
                             {
                                 System.Threading.Thread.Sleep(100);
-                                INST.WriteString(":SENS1:FREQ:CENT " + textBox_MK6.Text + "E6", true);
-                                INST.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST.ReadString().Split(',');
+                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK6.Text + "E6", true);
+                                INST_Table.WriteString(":CALC1:MARK1:Y?");
+                                ReadResults = INST_Table.ReadString().Split(',');
                                 num = double.Parse(ReadResults[0], NumberStyles.Float);
                                 resultMK6 = num.ToString();
                             }
@@ -548,7 +608,7 @@ namespace TurnTableTest
             }
             finally
             {
-                INST.IO.Close();
+                INST_Table.IO.Close();
             }
 
             
@@ -599,6 +659,33 @@ namespace TurnTableTest
         private void button6_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void button_startTest_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button_Table_Click(object sender, EventArgs e)
+        {
+            if(INST_Table.IO == null)
+            {
+                INST_Table.IO = (IMessage)RM.Open(Table, AccessMode.NO_LOCK, 5000, "");
+                INST_Table.IO.Timeout = 5000;
+                button_Table.Text = "Table OFF";
+            }
+            else
+            {
+                INST_Table.IO.Close();
+                button_Table.Text = "Table ON";
+            }
+            
+        }
+
+
+        private void textBox_Distination_TextChanged(object sender, EventArgs e)
+        {
+            DISTSTR = String.Format("{0:00000.00}", double.Parse(textBox_Distination.Text));
         }
     }
 }

@@ -62,6 +62,7 @@
             this.textBox_MK2 = new System.Windows.Forms.TextBox();
             this.textBox_MK3 = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.button_Move2 = new System.Windows.Forms.Button();
             this.textBox_Angle = new System.Windows.Forms.TextBox();
             this.comboBox_interval = new System.Windows.Forms.ComboBox();
             this.label11 = new System.Windows.Forms.Label();
@@ -84,6 +85,10 @@
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.checkBox6 = new System.Windows.Forms.CheckBox();
             this.textBox_MK6 = new System.Windows.Forms.TextBox();
+            this.button_startTest = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button_Table = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -411,6 +416,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.button_Move2);
             this.groupBox3.Controls.Add(this.textBox_Angle);
             this.groupBox3.Controls.Add(this.comboBox_interval);
             this.groupBox3.Controls.Add(this.label11);
@@ -427,6 +433,16 @@
             this.groupBox3.TabIndex = 7;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Table";
+            // 
+            // button_Move2
+            // 
+            this.button_Move2.Location = new System.Drawing.Point(190, 57);
+            this.button_Move2.Name = "button_Move2";
+            this.button_Move2.Size = new System.Drawing.Size(100, 26);
+            this.button_Move2.TabIndex = 30;
+            this.button_Move2.Text = "GO";
+            this.button_Move2.UseVisualStyleBackColor = true;
+            this.button_Move2.Click += new System.EventHandler(this.button_Move2_Click);
             // 
             // textBox_Angle
             // 
@@ -462,9 +478,9 @@
             // 
             // button_SetTable
             // 
-            this.button_SetTable.Location = new System.Drawing.Point(190, 67);
+            this.button_SetTable.Location = new System.Drawing.Point(190, 93);
             this.button_SetTable.Name = "button_SetTable";
-            this.button_SetTable.Size = new System.Drawing.Size(100, 47);
+            this.button_SetTable.Size = new System.Drawing.Size(100, 26);
             this.button_SetTable.TabIndex = 28;
             this.button_SetTable.Text = "SET";
             this.button_SetTable.UseVisualStyleBackColor = true;
@@ -474,7 +490,7 @@
             // 
             this.button_Move.Location = new System.Drawing.Point(190, 18);
             this.button_Move.Name = "button_Move";
-            this.button_Move.Size = new System.Drawing.Size(100, 46);
+            this.button_Move.Size = new System.Drawing.Size(100, 26);
             this.button_Move.TabIndex = 27;
             this.button_Move.Text = "GO";
             this.button_Move.UseVisualStyleBackColor = true;
@@ -504,6 +520,8 @@
             this.textBox_Distination.Name = "textBox_Distination";
             this.textBox_Distination.Size = new System.Drawing.Size(112, 19);
             this.textBox_Distination.TabIndex = 3;
+            this.textBox_Distination.Text = "0";
+            this.textBox_Distination.TextChanged += new System.EventHandler(this.textBox_Distination_TextChanged);
             // 
             // label10
             // 
@@ -642,11 +660,53 @@
             this.textBox_MK6.TabIndex = 27;
             this.textBox_MK6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
+            // button_startTest
+            // 
+            this.button_startTest.Location = new System.Drawing.Point(300, 355);
+            this.button_startTest.Name = "button_startTest";
+            this.button_startTest.Size = new System.Drawing.Size(100, 45);
+            this.button_startTest.TabIndex = 32;
+            this.button_startTest.Text = "TEST";
+            this.button_startTest.UseVisualStyleBackColor = true;
+            this.button_startTest.Click += new System.EventHandler(this.button_startTest_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(11, 377);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 33;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(92, 377);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 34;
+            this.button2.Text = "button2";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // button_Table
+            // 
+            this.button_Table.Location = new System.Drawing.Point(173, 377);
+            this.button_Table.Name = "button_Table";
+            this.button_Table.Size = new System.Drawing.Size(75, 23);
+            this.button_Table.TabIndex = 35;
+            this.button_Table.Text = "Table";
+            this.button_Table.UseVisualStyleBackColor = true;
+            this.button_Table.Click += new System.EventHandler(this.button_Table_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(633, 413);
+            this.Controls.Add(this.button_Table);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.button_startTest);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.button_startMeas);
             this.Controls.Add(this.button6);
@@ -732,6 +792,11 @@
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.CheckBox checkBox6;
         private System.Windows.Forms.TextBox textBox_MK6;
+        private System.Windows.Forms.Button button_startTest;
+        private System.Windows.Forms.Button button_Move2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button_Table;
     }
 }
 
