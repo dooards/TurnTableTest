@@ -133,7 +133,7 @@
             this.textBox_visaPol.Name = "textBox_visaPol";
             this.textBox_visaPol.Size = new System.Drawing.Size(223, 19);
             this.textBox_visaPol.TabIndex = 4;
-            this.textBox_visaPol.Text = "GPIB0::6::INSTR";
+            this.textBox_visaPol.Text = "GPIB0::5::INSTR";
             // 
             // textBox_visaVNA
             // 

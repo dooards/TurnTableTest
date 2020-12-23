@@ -41,7 +41,7 @@ namespace TurnTableTest
         bool polarity = false;
 
         //結果のファイル名
-        string FileName;
+        string FileName = "C:\\TEST\\test.csv";
 
         public Form1()
         {
@@ -122,9 +122,10 @@ namespace TurnTableTest
             double POSITION;
             double DISTINATION = double.Parse(textBox_Distination.Text);
             double SPAN;
-            string DISTSTR, POSISTR;
+            string DISTCOMMAND, POSISTR;
+            string DISTSTR = String.Format("{0:00000.00}", DISTINATION);
 
-            try
+            //try
             {
                 var session = (Ivi.Visa.IMessageBasedSession)
                 Ivi.Visa.GlobalResourceManager.Open(Table);
@@ -133,7 +134,11 @@ namespace TurnTableTest
                 session.FormattedIO.WriteLine("SPD00002.00");
                 session.FormattedIO.WriteLine("CP");
                 POSISTR = session.FormattedIO.ReadLine();
+                POSISTR = POSISTR.Substring(0,8);
                 POSITION = double.Parse(POSISTR);
+
+                //		POSISTR	"00000.00,0\r\r"	string
+
 
                 SPAN = DISTINATION - POSITION;
                 if (SPAN < 0)
@@ -141,14 +146,16 @@ namespace TurnTableTest
                     SPAN = SPAN + 360;
                 }
 
-                DISTSTR = "CWP" + String.Format("00000.00", SPAN);
-                session.FormattedIO.WriteLine(DISTSTR);
+                DISTCOMMAND = "CWP" + String.Format("{0:00000.00}", SPAN);
+                session.FormattedIO.WriteLine(DISTCOMMAND);
 
-                while (POSISTR == textBox_Distination.Text)
+                while (DISTSTR != POSISTR)
                 {
                     session.FormattedIO.WriteLine("CP");
                     POSISTR = session.FormattedIO.ReadLine();
+                    POSISTR = POSISTR.Substring(0, 8);
                     textBox_Angle.Text = POSISTR;
+                    textBox_Angle.Update();
                 }
 
                 session.FormattedIO.WriteLine("ST");
@@ -156,10 +163,10 @@ namespace TurnTableTest
                 session.Dispose();
                 session = null;
             }
-            catch
-            {
+            //catch
+            //{
 
-            }
+            //}
 
         }
 
@@ -192,7 +199,8 @@ namespace TurnTableTest
 
         private void button_SetTable_Click(object sender, EventArgs e)
         {
-            SPD = "SPD00000.00";
+            string POSISTR;
+
             try
             {
 
@@ -238,8 +246,14 @@ namespace TurnTableTest
                 var session = (Ivi.Visa.IMessageBasedSession)
                 Ivi.Visa.GlobalResourceManager.Open(Table);
 
-                session.FormattedIO.WriteLine(SPD);
 
+                session.FormattedIO.WriteLine("CP");
+                POSISTR = session.FormattedIO.ReadLine();
+                POSISTR = POSISTR.Substring(0, 8);
+                textBox_Angle.Text = POSISTR;
+                textBox_Angle.Update();
+
+                session.FormattedIO.WriteLine(SPD);
                 session.Dispose();
                 session = null;
             }
@@ -288,6 +302,10 @@ namespace TurnTableTest
             
             try
             {
+
+                StreamWriter prow = new StreamWriter(FileName, true, Encoding.Default);
+
+
                 //偏波
                 //var session_POL = (Ivi.Visa.IMessageBasedSession)
                 //Ivi.Visa.GlobalResourceManager.Open(Tower);
@@ -324,8 +342,9 @@ namespace TurnTableTest
 
                 //0位置移動
                 string AG = session_turn.FormattedIO.ReadLine();
+                AG = AG.Substring(0, 8);
 
-                if (AG != "0")
+                if (AG != "00000.00")
                 {
                     textBox_Distination.Text = "0";
                     this.button_Move.PerformClick();
@@ -338,10 +357,12 @@ namespace TurnTableTest
                 {
                     session_turn.FormattedIO.WriteLine("CP");
                     AG = session_turn.FormattedIO.ReadLine();
+                    AG = AG.Substring(0, 8);
                     textBox_Angle.Text = AG;
+                    textBox_Angle.Update();
 
-                } while (AG != "350");
-                session_turn.FormattedIO.WriteLine("ST");
+                } while (AG != "00350.00");
+                //session_turn.FormattedIO.WriteLine("ST");
 
                 //回転開始
                 session_turn.FormattedIO.WriteLine("CWP00370.00");
@@ -349,37 +370,51 @@ namespace TurnTableTest
                 {
                     session_turn.FormattedIO.WriteLine("CP");
                     AG = session_turn.FormattedIO.ReadLine();
+                    AG = AG.Substring(0, 8);
                     textBox_Angle.Text = AG;
+                    textBox_Angle.Update();
                     CPOS = double.Parse(AG);
 
-                } while (CPOS < 1.0 || CPOS > 359.0);
+                } while (CPOS < 359.5);
+
+               
+
 
                 //測定開始
-                for(int i = 0; i < MESPOINT; i++)
+                for (int i = 0; i < MESPOINT+1; i++)
                 {
+                   
+
                     do
                     {
                         session_turn.FormattedIO.WriteLine("CP");
-                        AG = session_turn.FormattedIO.ReadLine();
-                        textBox_Angle.Text = AG;
+                        AG = session_turn.FormattedIO.ReadLine().Substring(0,8);
+                        //AG = AG.Substring(0, 8);
+                        //textBox_Angle.Text = AG;
+                        //textBox_Angle.Update();
                         CPOS = double.Parse(AG);
 
-                        if (Math.Abs(i * INTVAL - CPOS) <= 0.2)
+                        if (CPOS==(i * INTVAL))//(Math.Abs(i*INTVAL-CPOS) < 0.02)
                         {
-                            StreamWriter prow = new StreamWriter(FileName, true, Encoding.Default);
+                           
+                            String results =  i.ToString()+ ","+ AG ;
+                            prow.WriteLine(results);
 
-                            prow.WriteLine(AG);
-                            prow.Close();
-
-                        }
-
-                        if (Math.Abs(i * INTVAL - CPOS) > 2)
-                        {
                             break;
+
                         }
+
+                        //if (Math.Abs(i * INTVAL - CPOS) > 30)
+                        //{
+                        //    return;
+                        //}
                     }
-                    while (CPOS > i * INTVAL);
+                    while (CPOS > 359.05 | CPOS < (i+1)* INTVAL | i < MESPOINT) ; //(CPOS > i * INTVAL);
+
+                    
                 }
+
+                prow.Close();
 
                 session_turn.Dispose();
                 session_turn = null;
@@ -547,14 +582,14 @@ namespace TurnTableTest
             if (checkBox_Hol.Checked == true)
             {
                 POL = "PH";
-                FileName = "C:\\TEST\\patternH.csv";
+               // FileName = "C:\\TEST\\patternH.csv";
                 TEST();
             }
 
             if (checkBox_Vel.Checked == true)
             {
                 POL = "PB";
-                FileName = "C:\\TEST\\patternV.csv";
+               // FileName = "C:\\TEST\\patternV.csv";
                 TEST();
             }
 
