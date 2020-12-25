@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.IO;
 using Ivi.Visa.Interop;
 using System.Globalization;
+using System.Threading;
 
 
 namespace TurnTableTest
@@ -18,7 +19,9 @@ namespace TurnTableTest
     {
         private ResourceManager RM = new ResourceManager();
         private FormattedIO488 INST_Table = new FormattedIO488();
-        
+        private FormattedIO488 INST_VNA = new FormattedIO488();
+        private FormattedIO488 INST_Tower = new FormattedIO488();
+
 
 
         //VISA
@@ -47,35 +50,46 @@ namespace TurnTableTest
         string DISTSTR; //distination
         string CPOS;
 
-        //結果のファイル名
-        string FileName = "C:\\TEST\\test.csv";
+        //結果のファイル
+        StreamWriter dataH = new StreamWriter("C:\\TEST\\test.csv", true, Encoding.Default);
+        StreamWriter dataV = new StreamWriter("C:\\TEST\\testV.csv", true, Encoding.Default);
 
-        StreamWriter prow = new StreamWriter("C:\\TEST\\test.csv", true, Encoding.Default);
+        string[] results = new string[360];
 
         public Form1()
         {
             InitializeComponent();
 
-            //VISA
+            //VISA adress
             E5071C = textBox_visaVNA.Text;
             Table = textBox_visaTable.Text;
             Tower = textBox_visaPol.Text;
 
+            //VNA settings
             VFRQ = textBox_FreqCenter.Text;
             VSPN = textBox_FreqBandwidth.Text;
             VPOW = textBox_Power.Text;
             VPOINT = textBox_PointNum.Text;
 
+            //Tower
+            POL = "PH";
+
+            //table settings
             DISTSTR = String.Format("{0:00000.00}", double.Parse(textBox_Distination.Text));
 
+
         }
+
+        //VISA address to combobox
         private void SETVISA()
         {
             string[] VISA = { Table, Tower, E5071C };
             comboBox_visaList.Items.AddRange(VISA);
             comboBox_visaList.SelectedIndex = 0;
         }
-        private void SETVELO()
+
+        //Speed of turn Table to combobox
+        private void VELOCITY()
         {
             string[] VELO = { "0.5", "0.75", "1.0", "1.5", "2.0" };
             comboBox_velo.Items.AddRange(VELO);
@@ -83,7 +97,8 @@ namespace TurnTableTest
             SPD = "SPD00000.50";
         }
 
-        private void DIVIDE()
+        //Measurement segment
+        private void SEGMENT()
         {
             string[] DIVE = { "1", "5", "10", "15" };
             comboBox_interval.Items.AddRange(DIVE);
@@ -91,11 +106,12 @@ namespace TurnTableTest
             INTVAL = 1;
         }
 
+
         private void Form1_Load(object sender, EventArgs e)
         {
             SETVISA();
-            SETVELO();
-            DIVIDE();
+            VELOCITY();
+            SEGMENT();
 
         }
 
@@ -110,19 +126,27 @@ namespace TurnTableTest
 
             try
             {
-                var session = (Ivi.Visa.IMessageBasedSession)
-                Ivi.Visa.GlobalResourceManager.Open(E5071C);
+                INST_VNA.IO.Clear();
+                INST_VNA.WriteString(FRQ);
+                INST_VNA.WriteString(SPN);
+                INST_VNA.WriteString(POINT);
+                INST_VNA.WriteString(POW);
 
-                session.FormattedIO.WriteLine(FRQ);
-                session.FormattedIO.WriteLine(SPN);
-                session.FormattedIO.WriteLine(POINT);
-                session.FormattedIO.WriteLine(POW);
-                session.Dispose();
-                session = null;
+                INST_VNA.WriteString("*OPC?");
+                for(int i = 0; i < 10; i++)
+                {
+                    string OPC = INST_VNA.ReadString();
+                    if (OPC.StartsWith("1"))
+                    {
+                        return;
+                    }
+                    Thread.Sleep(100);
+                }
+
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
 
         }
@@ -141,8 +165,10 @@ namespace TurnTableTest
             {
                 INST_Table.IO.Clear();
                 INST_Table.WriteString("SPD00002.00");
+
                 INST_Table.WriteString("CP");
                 CPOS = INST_Table.ReadString().Substring(0, 8);
+
                 POSITION = double.Parse(CPOS.Substring(0, 8));
                 DISTINATION = double.Parse(textBox_Distination.Text);
 
@@ -167,13 +193,10 @@ namespace TurnTableTest
                 {
                     await Task.Run(() => readposition());
                     textBox_Angle.Text = CPOS;
-
-
+                    
                 } while (DISTSTR != CPOS);
 
                 INST_Table.WriteString(SPD);
-
-
 
             }
             catch (Exception ex)
@@ -197,12 +220,6 @@ namespace TurnTableTest
         }
 
         //--------------------------------------------------------------------------
-
-        private void button_SETVISA_Click(object sender, EventArgs e)
-        {
-            comboBox_visaList.Items.Clear();
-            SETVISA();
-        }
 
         private void button_SENDCMD_Click(object sender, EventArgs e)
         {
@@ -389,7 +406,7 @@ namespace TurnTableTest
             string[] results = { textBox_MK1.Text, resultMK1, textBox_MK2.Text, resultMK2, textBox_MK3.Text, resultMK3,
             textBox_MK4.Text, resultMK4, textBox_MK5.Text, resultMK5, textBox_MK6.Text, resultMK6};
 
-            StreamWriter prow = new StreamWriter(FileName, true, Encoding.Default);
+            StreamWriter dataH = new StreamWriter(FileName, true, Encoding.Default);
             for (int k = 0; k < results.Length; k++)
             {
                 if (k == 0)
@@ -402,8 +419,8 @@ namespace TurnTableTest
                 }
 
             }
-            prow.WriteLine(TEXTDATA);
-            prow.Close();
+            dataH.WriteLine(TEXTDATA);
+            dataH.Close();
 
 
         }
@@ -417,23 +434,51 @@ namespace TurnTableTest
 
         private void button6_Click(object sender, EventArgs e)
         {
-            if(prow != null)
+            if(dataH != null)
             {
-                prow.Close();
+                dataH.Close();
             }
+
+            if (dataV != null)
+            {
+                dataV.Close();
+            }
+
+            if (INST_Table.IO != null)
+            {
+                INST_Table.IO.Clear();
+                INST_Table.IO.Close();
+                INST_Table.IO = null;
+            }
+
+            if(INST_VNA.IO != null)
+            {
+                INST_VNA.IO.Clear();
+                INST_VNA.IO.Close();
+                INST_VNA.IO = null;
+            }
+
             Application.Exit();
         }
 
         private async void button_startTest_Click(object sender, EventArgs e)
         {
+            if(INST_Table.IO == null)
+            {
+                MessageBox.Show("Table disconnected");
+                return;
+            }
+
+            if(INST_VNA.IO == null)
+            {
+                MessageBox.Show("VNA disconnected");
+                return;
+            }
+
 
             try
             {
-                INST_Table.WriteString("DL0");
-                INST_Table.WriteString("S1");
-                INST_Table.WriteString("HD0");
-                INST_Table.WriteString("VL1");
-                INST_Table.WriteString("M0");
+
                 INST_Table.WriteString("CP");
                 CPOS = INST_Table.ReadString().Substring(0, 8);
 
@@ -463,7 +508,6 @@ namespace TurnTableTest
                 {
                     await Task.Run(() => readposition2());
                     textBox_Angle.Text = CPOS;
-                    
 
                 }
 
@@ -492,15 +536,16 @@ namespace TurnTableTest
 
                     temp = Math.Abs(double.Parse(CPOS) - MESPOS);
 
-                    if(temp > 1)
+                    //差分が10以上で強制終了
+                    if(temp > 10)
                     {
                         MESPOS = MESPOINT;
                         return;
                     }
 
-                } while (temp > 0.1);
+                } while (temp > 0.1);　//差分が0.1以下になるまでループ
 
-                prow.WriteLine(CPOS);
+                dataH.WriteLine(CPOS);
                 
             }
             catch (Exception ex)
@@ -515,11 +560,6 @@ namespace TurnTableTest
 
             try
             {
-                INST_Table.WriteString("DL0");
-                INST_Table.WriteString("S1");
-                INST_Table.WriteString("HD0");
-                INST_Table.WriteString("VL1");
-                INST_Table.WriteString("M0");
                 INST_Table.WriteString("CP");
                 CPOS = INST_Table.ReadString().Substring(0, 8);
 
@@ -566,11 +606,18 @@ namespace TurnTableTest
 
         public void AsyncWork()
         {
-            INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6", true);
-            INST_Table.WriteString(":CALC1:MARK1:Y?");
-            String[] ReadResults = INST_Table.ReadString().Split(',');
-            double num = double.Parse(ReadResults[0], NumberStyles.Float);
-            string resultMK1 = num.ToString();
+            INST_VNA.WriteString(":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6", true);
+            INST_VNA.WriteString(":CALC1:MARK1 ON");
+            INST_VNA.WriteString(":CALC1: MARK1:X " + textBox_MK1.Text + "E6");
+            INST_VNA.WriteString(":CALC1:MARK1:Y?");
+            String[] ReadMK = INST_VNA.ReadString().Split(',');
+            double num = double.Parse(ReadMK[0], NumberStyles.Float);
+            string resultMK = num.ToString();
+
+            if(POL == "PH")
+            {
+                dataH.WriteLine(resultMK);
+            }
         }
 
 
@@ -595,35 +642,19 @@ namespace TurnTableTest
 
             } while (temp > 0.1);
 
-            prow.WriteLine(CPOS);
+            dataH.WriteLine(CPOS);
             return CPOS;
 
         }
 
-        private void button_Table_Click(object sender, EventArgs e)
-        {
-            if(INST_Table.IO == null)
-            {
-                INST_Table.IO = (IMessage)RM.Open(Table, AccessMode.NO_LOCK, 5000, "");
-                INST_Table.IO.Timeout = 5000;
-                button_Table.Text = "Table OFF";
-            }
-            else
-            {
-                INST_Table.IO.Clear();
-                INST_Table.IO.Close();
-                INST_Table.IO = null;
-               
-                button_Table.Text = "Table ON";
-            }
-            
-        }
+
 
 
         private void textBox_Distination_TextChanged(object sender, EventArgs e)
         {
             DISTSTR = String.Format("{0:00000.00}", double.Parse(textBox_Distination.Text));
         }
+
 
         private void comboBox_velo_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -672,6 +703,133 @@ namespace TurnTableTest
 
             Console.WriteLine(INTVAL);
             Console.WriteLine(MESPOINT);
+        }
+
+        private void button_Table_Click(object sender, EventArgs e)
+        {
+            if (INST_Table.IO == null)
+            {
+                INST_Table.IO = (IMessage)RM.Open(Table, AccessMode.NO_LOCK, 5000, "");
+                INST_Table.IO.Timeout = 5000;
+                INST_Table.IO.Clear();
+                INST_Table.WriteString("DL0");
+                INST_Table.WriteString("S1");
+                INST_Table.WriteString("HD0");
+                INST_Table.WriteString("VL1");
+                INST_Table.WriteString("M0");
+
+                button_Table.Text = "Table OFF";
+            }
+            else
+            {
+                INST_Table.IO.Clear();
+                INST_Table.IO.Close();
+                INST_Table.IO = null;
+
+                button_Table.Text = "Table ON";
+            }
+
+        }
+
+        private void button_VNA_Click(object sender, EventArgs e)
+        {
+            if (INST_VNA.IO == null)
+            {
+                INST_VNA.IO = (IMessage)RM.Open(E5071C, AccessMode.NO_LOCK, 5000, "");
+                INST_VNA.IO.Timeout = 5000;
+                button_VNA.Text = "VNA OFF";
+            }
+            else
+            {
+                INST_VNA.IO.Clear();
+                INST_VNA.IO.Close();
+                INST_VNA.IO = null;
+
+                button_VNA.Text = "VNA ON";
+            }
+        }
+
+        private void textBox_visaTable_TextChanged(object sender, EventArgs e)
+        {
+            comboBox_visaList.Items.Clear();
+            SETVISA();
+        }
+
+        private void textBox_visaPol_TextChanged(object sender, EventArgs e)
+        {
+            comboBox_visaList.Items.Clear();
+            SETVISA();
+        }
+
+        private void textBox_visaVNA_TextChanged(object sender, EventArgs e)
+        {
+            comboBox_visaList.Items.Clear();
+            SETVISA();
+        }
+
+        private async void button_VNATEST_Click(object sender, EventArgs e)
+        {
+            string FRQ = ":SENS1:FREQ:CENT " + VFRQ + "E6";
+            string SPN = ":SENS1:FREQ:SPAN " + VSPN + "E6";
+            string POINT = ":SENS1:SWE:POIN " + VPOINT;
+            string POW = ":SOUR1:VPOW " + VPOW;
+            
+
+            if (INST_VNA.IO == null)
+            {
+                MessageBox.Show("VNA disconnected");
+                return;
+            }
+
+            INST_VNA.WriteString(FRQ);
+            INST_VNA.WriteString(":SENS1: SWE:POIN 2");
+            INST_VNA.WriteString(":CALC1:MARK1:X " + "0" + "E6");
+
+            System.Threading.Thread.Sleep(1000);
+            MessageBox.Show("START");
+
+            try
+            {
+
+                for (MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
+                {
+                    await Task.Run(() => readposition3());
+                    textBox_Angle.Text = MESPOS.ToString();
+                    Task t = Task.Run(() => { AsyncVNARead(); });
+
+                }
+
+                for (int k = 0; k < 360; k++)
+                {
+
+                    dataH.WriteLine(results[k]);
+
+                }
+
+                MessageBox.Show("END");
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+        }
+
+        private void readposition3()
+        {
+            System.Threading.Thread.Sleep(500);
+        }
+
+        private void AsyncVNARead()
+        {
+            INST_VNA.WriteString(":CALC1:MARK1:Y?");
+           
+            String[] ReadResults = INST_VNA.ReadString().Split(',');
+            Console.WriteLine(ReadResults[0]);
+            double num = double.Parse(ReadResults[0], NumberStyles.Float);
+
+            results[MESPOS * 2 + 1] = num.ToString();
         }
     }
 }

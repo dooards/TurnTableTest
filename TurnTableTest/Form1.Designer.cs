@@ -38,7 +38,6 @@
             this.button_SENDCMD = new System.Windows.Forms.Button();
             this.comboBox_visaList = new System.Windows.Forms.ComboBox();
             this.label13 = new System.Windows.Forms.Label();
-            this.button_SETVISA = new System.Windows.Forms.Button();
             this.textBox_CMD = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -84,9 +83,9 @@
             this.checkBox6 = new System.Windows.Forms.CheckBox();
             this.textBox_MK6 = new System.Windows.Forms.TextBox();
             this.button_startTest = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.button_VNA = new System.Windows.Forms.Button();
             this.button_Table = new System.Windows.Forms.Button();
+            this.button_VNATEST = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -129,6 +128,7 @@
             this.textBox_visaTable.Size = new System.Drawing.Size(223, 19);
             this.textBox_visaTable.TabIndex = 3;
             this.textBox_visaTable.Text = "GPIB0::2::INSTR";
+            this.textBox_visaTable.TextChanged += new System.EventHandler(this.textBox_visaTable_TextChanged);
             // 
             // textBox_visaPol
             // 
@@ -137,6 +137,7 @@
             this.textBox_visaPol.Size = new System.Drawing.Size(223, 19);
             this.textBox_visaPol.TabIndex = 4;
             this.textBox_visaPol.Text = "GPIB0::5::INSTR";
+            this.textBox_visaPol.TextChanged += new System.EventHandler(this.textBox_visaPol_TextChanged);
             // 
             // textBox_visaVNA
             // 
@@ -145,33 +146,28 @@
             this.textBox_visaVNA.Size = new System.Drawing.Size(224, 19);
             this.textBox_visaVNA.TabIndex = 5;
             this.textBox_visaVNA.Text = "USB0::0x0957::0x0D09::MY46101208::0::INSTR";
+            this.textBox_visaVNA.TextChanged += new System.EventHandler(this.textBox_visaVNA_TextChanged);
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.button_SENDCMD);
-            this.groupBox1.Controls.Add(this.comboBox_visaList);
-            this.groupBox1.Controls.Add(this.label13);
-            this.groupBox1.Controls.Add(this.button_SETVISA);
-            this.groupBox1.Controls.Add(this.textBox_CMD);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.label14);
             this.groupBox1.Controls.Add(this.textBox_visaTable);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.textBox_visaPol);
             this.groupBox1.Controls.Add(this.textBox_visaVNA);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(302, 174);
+            this.groupBox1.Size = new System.Drawing.Size(302, 96);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "VISA";
             // 
             // button_SENDCMD
             // 
-            this.button_SENDCMD.Location = new System.Drawing.Point(196, 144);
+            this.button_SENDCMD.Location = new System.Drawing.Point(206, 15);
             this.button_SENDCMD.Name = "button_SENDCMD";
-            this.button_SENDCMD.Size = new System.Drawing.Size(100, 24);
+            this.button_SENDCMD.Size = new System.Drawing.Size(84, 48);
             this.button_SENDCMD.TabIndex = 8;
             this.button_SENDCMD.Text = "SEND";
             this.button_SENDCMD.UseVisualStyleBackColor = true;
@@ -180,42 +176,32 @@
             // comboBox_visaList
             // 
             this.comboBox_visaList.FormattingEnabled = true;
-            this.comboBox_visaList.Location = new System.Drawing.Point(72, 93);
+            this.comboBox_visaList.Location = new System.Drawing.Point(73, 18);
             this.comboBox_visaList.Name = "comboBox_visaList";
-            this.comboBox_visaList.Size = new System.Drawing.Size(223, 20);
+            this.comboBox_visaList.Size = new System.Drawing.Size(125, 20);
             this.comboBox_visaList.TabIndex = 10;
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(6, 122);
+            this.label13.Location = new System.Drawing.Point(7, 47);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(63, 12);
             this.label13.TabIndex = 9;
             this.label13.Text = "COMMAND";
             // 
-            // button_SETVISA
-            // 
-            this.button_SETVISA.Location = new System.Drawing.Point(72, 144);
-            this.button_SETVISA.Name = "button_SETVISA";
-            this.button_SETVISA.Size = new System.Drawing.Size(100, 24);
-            this.button_SETVISA.TabIndex = 29;
-            this.button_SETVISA.Text = "SET";
-            this.button_SETVISA.UseVisualStyleBackColor = true;
-            this.button_SETVISA.Click += new System.EventHandler(this.button_SETVISA_Click);
-            // 
             // textBox_CMD
             // 
-            this.textBox_CMD.Location = new System.Drawing.Point(72, 119);
+            this.textBox_CMD.Location = new System.Drawing.Point(73, 44);
             this.textBox_CMD.Name = "textBox_CMD";
-            this.textBox_CMD.Size = new System.Drawing.Size(223, 19);
+            this.textBox_CMD.Size = new System.Drawing.Size(125, 19);
             this.textBox_CMD.TabIndex = 7;
             this.textBox_CMD.Text = "*IDN?";
             // 
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(6, 96);
+            this.label14.Location = new System.Drawing.Point(7, 21);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(31, 12);
             this.label14.TabIndex = 6;
@@ -232,7 +218,7 @@
             this.groupBox2.Controls.Add(this.textBox_FreqBandwidth);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.textBox_PointNum);
-            this.groupBox2.Location = new System.Drawing.Point(320, 145);
+            this.groupBox2.Location = new System.Drawing.Point(12, 114);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(302, 93);
             this.groupBox2.TabIndex = 7;
@@ -423,7 +409,7 @@
             this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Controls.Add(this.textBox_Distination);
             this.groupBox3.Controls.Add(this.label10);
-            this.groupBox3.Location = new System.Drawing.Point(320, 12);
+            this.groupBox3.Location = new System.Drawing.Point(320, 80);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(302, 127);
             this.groupBox3.TabIndex = 7;
@@ -432,9 +418,9 @@
             // 
             // button_Move2
             // 
-            this.button_Move2.Location = new System.Drawing.Point(189, 18);
+            this.button_Move2.Location = new System.Drawing.Point(189, 68);
             this.button_Move2.Name = "button_Move2";
-            this.button_Move2.Size = new System.Drawing.Size(100, 23);
+            this.button_Move2.Size = new System.Drawing.Size(100, 44);
             this.button_Move2.TabIndex = 30;
             this.button_Move2.Text = "GO";
             this.button_Move2.UseVisualStyleBackColor = true;
@@ -442,7 +428,7 @@
             // 
             // textBox_Angle
             // 
-            this.textBox_Angle.Location = new System.Drawing.Point(72, 18);
+            this.textBox_Angle.Location = new System.Drawing.Point(72, 68);
             this.textBox_Angle.Name = "textBox_Angle";
             this.textBox_Angle.Size = new System.Drawing.Size(112, 19);
             this.textBox_Angle.TabIndex = 8;
@@ -450,16 +436,16 @@
             // comboBox_interval
             // 
             this.comboBox_interval.FormattingEnabled = true;
-            this.comboBox_interval.Location = new System.Drawing.Point(72, 94);
+            this.comboBox_interval.Location = new System.Drawing.Point(210, 34);
             this.comboBox_interval.Name = "comboBox_interval";
-            this.comboBox_interval.Size = new System.Drawing.Size(112, 20);
+            this.comboBox_interval.Size = new System.Drawing.Size(59, 20);
             this.comboBox_interval.TabIndex = 29;
             this.comboBox_interval.SelectedIndexChanged += new System.EventHandler(this.comboBox_interval_SelectedIndexChanged);
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(9, 21);
+            this.label11.Location = new System.Drawing.Point(9, 71);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(34, 12);
             this.label11.TabIndex = 6;
@@ -468,16 +454,16 @@
             // comboBox_velo
             // 
             this.comboBox_velo.FormattingEnabled = true;
-            this.comboBox_velo.Location = new System.Drawing.Point(72, 68);
+            this.comboBox_velo.Location = new System.Drawing.Point(72, 34);
             this.comboBox_velo.Name = "comboBox_velo";
-            this.comboBox_velo.Size = new System.Drawing.Size(112, 20);
+            this.comboBox_velo.Size = new System.Drawing.Size(59, 20);
             this.comboBox_velo.TabIndex = 11;
             this.comboBox_velo.SelectedIndexChanged += new System.EventHandler(this.comboBox_velo_SelectedIndexChanged);
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(9, 46);
+            this.label8.Location = new System.Drawing.Point(9, 96);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(60, 12);
             this.label8.TabIndex = 0;
@@ -486,7 +472,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(9, 97);
+            this.label9.Location = new System.Drawing.Point(147, 37);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(43, 12);
             this.label9.TabIndex = 2;
@@ -494,7 +480,7 @@
             // 
             // textBox_Distination
             // 
-            this.textBox_Distination.Location = new System.Drawing.Point(72, 43);
+            this.textBox_Distination.Location = new System.Drawing.Point(72, 93);
             this.textBox_Distination.Name = "textBox_Distination";
             this.textBox_Distination.Size = new System.Drawing.Size(112, 19);
             this.textBox_Distination.TabIndex = 3;
@@ -504,7 +490,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(9, 71);
+            this.label10.Location = new System.Drawing.Point(9, 37);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(47, 12);
             this.label10.TabIndex = 1;
@@ -513,7 +499,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(7, 21);
+            this.label12.Location = new System.Drawing.Point(6, 72);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(34, 12);
             this.label12.TabIndex = 7;
@@ -521,9 +507,9 @@
             // 
             // textBox_VALUE
             // 
-            this.textBox_VALUE.Location = new System.Drawing.Point(73, 18);
+            this.textBox_VALUE.Location = new System.Drawing.Point(73, 69);
             this.textBox_VALUE.Name = "textBox_VALUE";
-            this.textBox_VALUE.Size = new System.Drawing.Size(525, 19);
+            this.textBox_VALUE.Size = new System.Drawing.Size(224, 19);
             this.textBox_VALUE.TabIndex = 9;
             // 
             // groupBox5
@@ -531,7 +517,7 @@
             this.groupBox5.Controls.Add(this.checkBox_Vel);
             this.groupBox5.Controls.Add(this.checkBox_Hol);
             this.groupBox5.Controls.Add(this.button_SetPol);
-            this.groupBox5.Location = new System.Drawing.Point(12, 192);
+            this.groupBox5.Location = new System.Drawing.Point(320, 12);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(302, 46);
             this.groupBox5.TabIndex = 27;
@@ -570,20 +556,25 @@
             // 
             // groupBox6
             // 
+            this.groupBox6.Controls.Add(this.button_SENDCMD);
             this.groupBox6.Controls.Add(this.textBox_VALUE);
+            this.groupBox6.Controls.Add(this.label13);
+            this.groupBox6.Controls.Add(this.comboBox_visaList);
             this.groupBox6.Controls.Add(this.label12);
-            this.groupBox6.Location = new System.Drawing.Point(11, 299);
+            this.groupBox6.Controls.Add(this.textBox_CMD);
+            this.groupBox6.Controls.Add(this.label14);
+            this.groupBox6.Location = new System.Drawing.Point(11, 268);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(609, 50);
+            this.groupBox6.Size = new System.Drawing.Size(303, 100);
             this.groupBox6.TabIndex = 28;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Status";
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(512, 355);
+            this.button6.Location = new System.Drawing.Point(525, 324);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(100, 45);
+            this.button6.Size = new System.Drawing.Size(90, 45);
             this.button6.TabIndex = 10;
             this.button6.Text = "END";
             this.button6.UseVisualStyleBackColor = true;
@@ -591,9 +582,9 @@
             // 
             // button_startMeas
             // 
-            this.button_startMeas.Location = new System.Drawing.Point(406, 355);
+            this.button_startMeas.Location = new System.Drawing.Point(429, 324);
             this.button_startMeas.Name = "button_startMeas";
-            this.button_startMeas.Size = new System.Drawing.Size(100, 45);
+            this.button_startMeas.Size = new System.Drawing.Size(90, 45);
             this.button_startMeas.TabIndex = 30;
             this.button_startMeas.Text = "Mesurement";
             this.button_startMeas.UseVisualStyleBackColor = true;
@@ -613,7 +604,7 @@
             this.groupBox7.Controls.Add(this.textBox_MK2);
             this.groupBox7.Controls.Add(this.checkBox3);
             this.groupBox7.Controls.Add(this.textBox_MK3);
-            this.groupBox7.Location = new System.Drawing.Point(11, 244);
+            this.groupBox7.Location = new System.Drawing.Point(11, 213);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(610, 49);
             this.groupBox7.TabIndex = 31;
@@ -640,58 +631,60 @@
             // 
             // button_startTest
             // 
-            this.button_startTest.Location = new System.Drawing.Point(300, 355);
+            this.button_startTest.Location = new System.Drawing.Point(333, 324);
             this.button_startTest.Name = "button_startTest";
-            this.button_startTest.Size = new System.Drawing.Size(100, 45);
+            this.button_startTest.Size = new System.Drawing.Size(90, 45);
             this.button_startTest.TabIndex = 32;
             this.button_startTest.Text = "TEST";
             this.button_startTest.UseVisualStyleBackColor = true;
             this.button_startTest.Click += new System.EventHandler(this.button_startTest_Click);
             // 
-            // button1
+            // button_VNA
             // 
-            this.button1.Location = new System.Drawing.Point(11, 377);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 33;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(92, 377);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 34;
-            this.button2.Text = "button2";
-            this.button2.UseVisualStyleBackColor = true;
+            this.button_VNA.Location = new System.Drawing.Point(334, 278);
+            this.button_VNA.Name = "button_VNA";
+            this.button_VNA.Size = new System.Drawing.Size(89, 40);
+            this.button_VNA.TabIndex = 33;
+            this.button_VNA.Text = "VNA";
+            this.button_VNA.UseVisualStyleBackColor = true;
+            this.button_VNA.Click += new System.EventHandler(this.button_VNA_Click);
             // 
             // button_Table
             // 
-            this.button_Table.Location = new System.Drawing.Point(173, 377);
+            this.button_Table.Location = new System.Drawing.Point(429, 278);
             this.button_Table.Name = "button_Table";
-            this.button_Table.Size = new System.Drawing.Size(75, 23);
+            this.button_Table.Size = new System.Drawing.Size(90, 40);
             this.button_Table.TabIndex = 35;
             this.button_Table.Text = "Table";
             this.button_Table.UseVisualStyleBackColor = true;
             this.button_Table.Click += new System.EventHandler(this.button_Table_Click);
             // 
+            // button_VNATEST
+            // 
+            this.button_VNATEST.Location = new System.Drawing.Point(525, 276);
+            this.button_VNATEST.Name = "button_VNATEST";
+            this.button_VNATEST.Size = new System.Drawing.Size(90, 45);
+            this.button_VNATEST.TabIndex = 36;
+            this.button_VNATEST.Text = "VNA TEST";
+            this.button_VNATEST.UseVisualStyleBackColor = true;
+            this.button_VNATEST.Click += new System.EventHandler(this.button_VNATEST_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(633, 413);
+            this.ClientSize = new System.Drawing.Size(633, 387);
+            this.Controls.Add(this.button_VNATEST);
             this.Controls.Add(this.button_Table);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.button_VNA);
             this.Controls.Add(this.button_startTest);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.button_startMeas);
             this.Controls.Add(this.button6);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -763,16 +756,15 @@
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.Button button_startMeas;
         private System.Windows.Forms.ComboBox comboBox_velo;
-        private System.Windows.Forms.Button button_SETVISA;
         private System.Windows.Forms.ComboBox comboBox_interval;
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.CheckBox checkBox6;
         private System.Windows.Forms.TextBox textBox_MK6;
         private System.Windows.Forms.Button button_startTest;
         private System.Windows.Forms.Button button_Move2;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button_VNA;
         private System.Windows.Forms.Button button_Table;
+        private System.Windows.Forms.Button button_VNATEST;
     }
 }
 
