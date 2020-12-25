@@ -54,7 +54,7 @@ namespace TurnTableTest
         StreamWriter dataH = new StreamWriter("C:\\TEST\\test.csv", true, Encoding.Default);
         StreamWriter dataV = new StreamWriter("C:\\TEST\\testV.csv", true, Encoding.Default);
 
-        string[] results = new string[360];
+        string[] results = new string[500];
 
         public Form1()
         {
@@ -122,7 +122,7 @@ namespace TurnTableTest
             string FRQ = ":SENS1:FREQ:CENT " + VFRQ + "E6";
             string SPN = ":SENS1:FREQ:SPAN " + VSPN + "E6";
             string POINT = ":SENS1:SWE:POIN " + VPOINT;
-            string POW = ":SOUR1:VPOW " + VPOW;
+            string POW = ":SOUR1:POW " + VPOW;
 
             try
             {
@@ -132,16 +132,6 @@ namespace TurnTableTest
                 INST_VNA.WriteString(POINT);
                 INST_VNA.WriteString(POW);
 
-                INST_VNA.WriteString("*OPC?");
-                for(int i = 0; i < 10; i++)
-                {
-                    string OPC = INST_VNA.ReadString();
-                    if (OPC.StartsWith("1"))
-                    {
-                        return;
-                    }
-                    Thread.Sleep(100);
-                }
 
             }
             catch (Exception ex)
@@ -278,152 +268,7 @@ namespace TurnTableTest
 
 
 
-        private void VNAMEAS()
-        {
-            string resultMK1 = null;
-            string resultMK2 = null;
-            string resultMK3 = null;
-            string resultMK4 = null;
-            string resultMK5 = null;
-            string resultMK6 = null;
-            string TEXTDATA = null;
-            string[] ReadResults;
-            double num;
 
-            try
-            {
-
-
-                for (int i = 1; i <7; i++)
-                {
-
-                    string loop = i.ToString();
-
-                    INST_Table.IO = (IMessage)RM.Open(E5071C , AccessMode.NO_LOCK, 2000, "");
-                    INST_Table.IO.Timeout = 5000;
-
-                    INST_Table.IO.Clear();
-                    INST_Table.WriteString(":SENS1:FREQ:SPAN " + "0E6", true);
-
-                    switch (i)
-                    {
-                        case 1:
-                            if (checkBox1.Checked == true)
-                            {
-                                System.Threading.Thread.Sleep(100);
-                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6", true);
-                                INST_Table.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST_Table.ReadString().Split(',');
-                                num = double.Parse(ReadResults[0], NumberStyles.Float);
-                                resultMK1 = num.ToString();
-                            }
-
-                            break;
-
-                        case 2:
-                            if (checkBox2.Checked == true)
-                            {
-                                System.Threading.Thread.Sleep(100);
-                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK2.Text + "E6", true);
-                                INST_Table.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST_Table.ReadString().Split(',');
-                                num = double.Parse(ReadResults[0], NumberStyles.Float);
-                                resultMK2 = num.ToString();
-                            }
-
-                            break;
-
-                        case 3:
-                            if (checkBox3.Checked == true)
-                            {
-                                System.Threading.Thread.Sleep(100);
-                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK3.Text + "E6", true);
-                                INST_Table.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST_Table.ReadString().Split(',');
-                                num = double.Parse(ReadResults[0], NumberStyles.Float);
-                                resultMK3 = num.ToString();
-                            }
-
-                            break;
-
-                        case 4:
-                            if (checkBox4.Checked == true)
-                            {
-                                System.Threading.Thread.Sleep(100);
-                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK4.Text + "E6", true);
-                                INST_Table.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST_Table.ReadString().Split(',');
-                                num = double.Parse(ReadResults[0], NumberStyles.Float);
-                                resultMK4 = num.ToString();
-                            }
-
-                            break;
-
-                        case 5:
-                            if (checkBox5.Checked == true)
-                            {
-                                System.Threading.Thread.Sleep(100);
-                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK5.Text + "E6", true);
-                                INST_Table.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST_Table.ReadString().Split(',');
-                                num = double.Parse(ReadResults[0], NumberStyles.Float);
-                                resultMK5 = num.ToString();
-                            }
-
-                            break;
-
-                        case 6:
-                            if (checkBox6.Checked == true)
-                            {
-                                System.Threading.Thread.Sleep(100);
-                                INST_Table.WriteString(":SENS1:FREQ:CENT " + textBox_MK6.Text + "E6", true);
-                                INST_Table.WriteString(":CALC1:MARK1:Y?");
-                                ReadResults = INST_Table.ReadString().Split(',');
-                                num = double.Parse(ReadResults[0], NumberStyles.Float);
-                                resultMK6 = num.ToString();
-                            }
-
-                            break;
-
-
-
-                    }
-
-                }
-            }
-
-            catch
-            {
-
-            }
-            finally
-            {
-                INST_Table.IO.Close();
-            }
-
-            
-
-            string[] results = { textBox_MK1.Text, resultMK1, textBox_MK2.Text, resultMK2, textBox_MK3.Text, resultMK3,
-            textBox_MK4.Text, resultMK4, textBox_MK5.Text, resultMK5, textBox_MK6.Text, resultMK6};
-
-            StreamWriter dataH = new StreamWriter(FileName, true, Encoding.Default);
-            for (int k = 0; k < results.Length; k++)
-            {
-                if (k == 0)
-                {
-                    TEXTDATA = results[k] + ",";
-                }
-                else
-                {
-                    TEXTDATA = TEXTDATA + results[k] + ",";
-                }
-
-            }
-            dataH.WriteLine(TEXTDATA);
-            dataH.Close();
-
-
-        }
 
         private void button_startMeas_Click(object sender, EventArgs e)
         {
@@ -769,9 +614,10 @@ namespace TurnTableTest
 
         private async void button_VNATEST_Click(object sender, EventArgs e)
         {
-            string FRQ = ":SENS1:FREQ:CENT " + VFRQ + "E6";
-            string SPN = ":SENS1:FREQ:SPAN " + VSPN + "E6";
-            string POINT = ":SENS1:SWE:POIN " + VPOINT;
+            string START = ":SENS1:FREQ:STAR " + textBox_MK1.Text + "E6";
+            string END = ":SENS1:FREQ:STOP " + textBox_MK2.Text + "E6";
+            string SPN = ":SENS1:FREQ:SPAN " + "0" + "E6";
+            string POINT = ":SENS1:SWE:POIN " + "201";
             string POW = ":SOUR1:VPOW " + VPOW;
             
 
@@ -781,9 +627,13 @@ namespace TurnTableTest
                 return;
             }
 
-            INST_VNA.WriteString(FRQ);
-            INST_VNA.WriteString(":SENS1: SWE:POIN 2");
-            INST_VNA.WriteString(":CALC1:MARK1:X " + "0" + "E6");
+            INST_VNA.WriteString(START);
+            INST_VNA.WriteString(END);
+            INST_VNA.WriteString(POINT);
+            INST_VNA.WriteString(":CALC1:MARK1 ON");
+            INST_VNA.WriteString(":CALC1:MARK1:X " + textBox_MK1.Text + "E6");
+            INST_VNA.WriteString(":CALC1:MARK2:X " + textBox_MK2.Text + "E6");
+
 
             System.Threading.Thread.Sleep(1000);
             MessageBox.Show("START");
@@ -818,7 +668,7 @@ namespace TurnTableTest
 
         private void readposition3()
         {
-            System.Threading.Thread.Sleep(500);
+            System.Threading.Thread.Sleep(100);
         }
 
         private void AsyncVNARead()
@@ -829,7 +679,34 @@ namespace TurnTableTest
             Console.WriteLine(ReadResults[0]);
             double num = double.Parse(ReadResults[0], NumberStyles.Float);
 
-            results[MESPOS * 2 + 1] = num.ToString();
+            INST_VNA.WriteString(":CALC1:MARK2:Y?");
+
+            String[] ReadResults2 = INST_VNA.ReadString().Split(',');
+            Console.WriteLine(ReadResults2[0]);
+            double num2 = double.Parse(ReadResults2[0], NumberStyles.Float);
+
+            results[MESPOS] = num.ToString() + "," + num2.ToString();
         }
+
+        private void textBox_FreqCenter_TextChanged(object sender, EventArgs e)
+        {
+            VFRQ = textBox_FreqCenter.Text;
+        }
+
+        private void textBox_PointNum_TextChanged(object sender, EventArgs e)
+        {
+            VPOINT = textBox_PointNum.Text;
+        }
+
+        private void textBox_FreqBandwidth_TextChanged(object sender, EventArgs e)
+        {
+            VSPN = textBox_FreqBandwidth.Text;
+        }
+
+        private void textBox_Power_TextChanged(object sender, EventArgs e)
+        {
+            VPOW = textBox_Power.Text;
+        }
+
     }
 }

@@ -243,6 +243,7 @@
             this.textBox_Power.TabIndex = 12;
             this.textBox_Power.Text = "0";
             this.textBox_Power.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.textBox_Power.TextChanged += new System.EventHandler(this.textBox_Power_TextChanged);
             // 
             // label7
             // 
@@ -279,6 +280,7 @@
             this.textBox_FreqCenter.TabIndex = 6;
             this.textBox_FreqCenter.Text = "4600";
             this.textBox_FreqCenter.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.textBox_FreqCenter.TextChanged += new System.EventHandler(this.textBox_FreqCenter_TextChanged);
             // 
             // textBox_FreqBandwidth
             // 
@@ -288,6 +290,7 @@
             this.textBox_FreqBandwidth.TabIndex = 7;
             this.textBox_FreqBandwidth.Text = "100";
             this.textBox_FreqBandwidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.textBox_FreqBandwidth.TextChanged += new System.EventHandler(this.textBox_FreqBandwidth_TextChanged);
             // 
             // label4
             // 
@@ -306,6 +309,7 @@
             this.textBox_PointNum.TabIndex = 8;
             this.textBox_PointNum.Text = "801";
             this.textBox_PointNum.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.textBox_PointNum.TextChanged += new System.EventHandler(this.textBox_PointNum_TextChanged);
             // 
             // checkBox5
             // 
@@ -316,6 +320,7 @@
             this.checkBox5.TabIndex = 26;
             this.checkBox5.Text = "MK5";
             this.checkBox5.UseVisualStyleBackColor = true;
+
             // 
             // textBox_MK5
             // 
@@ -334,6 +339,7 @@
             this.checkBox4.TabIndex = 24;
             this.checkBox4.Text = "MK4";
             this.checkBox4.UseVisualStyleBackColor = true;
+
             // 
             // checkBox3
             // 
@@ -344,6 +350,7 @@
             this.checkBox3.TabIndex = 23;
             this.checkBox3.Text = "MK3";
             this.checkBox3.UseVisualStyleBackColor = true;
+
             // 
             // checkBox2
             // 
@@ -354,6 +361,7 @@
             this.checkBox2.TabIndex = 22;
             this.checkBox2.Text = "MK2";
             this.checkBox2.UseVisualStyleBackColor = true;
+
             // 
             // checkBox1
             // 
@@ -364,6 +372,7 @@
             this.checkBox1.TabIndex = 21;
             this.checkBox1.Text = "MK1";
             this.checkBox1.UseVisualStyleBackColor = true;
+
             // 
             // textBox_MK4
             // 
@@ -620,6 +629,7 @@
             this.checkBox6.TabIndex = 28;
             this.checkBox6.Text = "MK6";
             this.checkBox6.UseVisualStyleBackColor = true;
+
             // 
             // textBox_MK6
             // 
