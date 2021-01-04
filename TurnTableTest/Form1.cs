@@ -208,7 +208,11 @@ namespace TurnTableTest
                 Ivi.Visa.GlobalResourceManager.Open(comboBox_visaList.SelectedItem.ToString());
 
                 session.FormattedIO.WriteLine(CMD);
-                textBox_VALUE.Text= session.FormattedIO.ReadLine();    
+
+                if (textBox_CMD.Text.Contains("?"))
+                {
+                    textBox_VALUE.Text = session.FormattedIO.ReadLine();
+                }
 
                 session.Dispose();
                 session = null;
@@ -757,6 +761,30 @@ namespace TurnTableTest
                 return;
             }
 
+            //
+            int omega = 0;
+            double a = comboBox_velo.SelectedIndex;
+
+            switch (a)
+            {
+                case 0:
+                    omega = 333;
+                    break;
+                case 1:
+                    omega = 222;
+                    break;
+                case 2:
+                    omega = 166;
+                    break;
+                case 3:
+                    omega = 111;
+                    break;
+                case 4:
+                    omega = 83;
+                    break;
+
+            }
+
             //測定開始
             Task t = Task.Run(() => { AsyncVNARead(); });
 
@@ -764,7 +792,7 @@ namespace TurnTableTest
             {
                 for (MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
                 {
-                    await Task.Run(() => readposition3());
+                    await Task.Run(() => readposition3(omega));
                     textBox_Angle.Text = MESPOS.ToString();
                     t = Task.Run(() => { AsyncVNARead(); });
                 }
@@ -801,9 +829,11 @@ namespace TurnTableTest
 
         }
 
-        private void readposition3()
+        private void readposition3(int speed)
         {
-            System.Threading.Thread.Sleep(100);
+
+            System.Threading.Thread.Sleep(speed);
+
         }
 
         private void AsyncVNARead()
