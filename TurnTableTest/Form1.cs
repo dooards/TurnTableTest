@@ -52,6 +52,9 @@ namespace TurnTableTest
         //結果のファイル
         StreamWriter data;
 
+        //flag
+        
+
 
         public Form1()
         {
@@ -259,22 +262,37 @@ namespace TurnTableTest
         }
 
 
-        private void button_startMeas_Click(object sender, EventArgs e)
+        private async void button_startMeas_Click(object sender, EventArgs e)
         {
+
             if (checkBox_Hol.Checked == true)
             {
                 POL = "PV";
                 this.button_SetPol.PerformClick();
-                TEST();
+                await TEST();
+
+                if (checkBox_Vel.Checked == true)
+                {
+                    POL = "PH";
+                    this.button_SetPol.PerformClick();
+                    await TEST();
+                }
+
             }
-            if (checkBox_Vel.Checked == true)
+            else
             {
-                POL = "PH";
-                this.button_SetPol.PerformClick();
-                TEST();
+                if (checkBox_Vel.Checked == true)
+                {
+                    POL = "PH";
+                    this.button_SetPol.PerformClick();
+                    await TEST();
+                }
             }
+            
 
         }
+
+
 
         public void readposition()
         {
@@ -290,39 +308,10 @@ namespace TurnTableTest
             }
         }
 
-        public void readposition2()
-        {
-            double temp;
-
-            try
-            {
-                do
-                {
-                    INST_Table.WriteString("CP");
-                    CPOS = INST_Table.ReadString().Substring(0, 8);
-                    Console.WriteLine(CPOS);
-
-                    temp = Math.Abs(double.Parse(CPOS) - MESPOS);
-
-                    //差分が10以上で
-                    if(temp > 15)
-                    {
-                        //強制終了
-                        MESPOS = MESPOINT;
-                        return;
-                    }
-
-                } while (temp > 0.1);　//差分が0.1以下になるまでループ
-                
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
+        
 
         //MEASUREMENT
-        private async void TEST()
+        private async Task TEST()
         {
 
             try
@@ -337,18 +326,6 @@ namespace TurnTableTest
                     this.button_Move2.PerformClick();
                 }
 
-
-                //逆回転
-                INST_Table.WriteString("CCP00010.00");
-                do
-                {
-                    await Task.Run(() => readposition());
-                    textBox_Angle.Text = CPOS;
-
-                } while (CPOS != "00350.00");
-
-                //VNA測定初期化
-                await Task.Run(() => INITVNA());
 
                 //保存するファイルの処理
                 string MeasFileName = null;
@@ -384,10 +361,25 @@ namespace TurnTableTest
                 }
 
 
-                
+                //逆回転
+                INST_Table.WriteString("CCP00010.00");
+                do
+                {
+                    await Task.Run(() => readposition());
+                    textBox_Angle.Text = CPOS;
+
+                } while (CPOS != "00350.00");
+
+                //VNA測定初期化
+                await Task.Run(() => INITVNA());
+
+
+                //SPD設定
+                INST_Table.WriteString(SPD);
 
                 //回転開始
                 INST_Table.WriteString("CWP00370.00");
+
 
                 //測定開始
                 Task t = Task.Run(() => { AsyncVNARead(); });
@@ -398,6 +390,9 @@ namespace TurnTableTest
                     //回転位置
                     await Task.Run(() => readposition2());
 
+                    int x = MESPOS * INTVAL;
+                    textBox_Angle.Text = x.ToString();
+
                     //VNA
                     t = Task.Run(() => { AsyncVNARead(); });
                 }
@@ -405,7 +400,7 @@ namespace TurnTableTest
 
                 string temp = null;
 
-                for (int k = 0; k < 360; k++)
+                for (int k = 0; k < MESPOINT; k++)
                 {
                     for (int l = 0; l < 6; l++)
                     {
@@ -424,6 +419,7 @@ namespace TurnTableTest
 
                 data.Close();
                 MessageBox.Show("END");
+                
 
             }
             catch (Exception ex)
@@ -431,6 +427,49 @@ namespace TurnTableTest
                 MessageBox.Show(ex.Message);
             }
 
+        }
+
+        public void readposition2()
+        {
+            double temp;
+
+            try
+            {
+                do
+                {
+                    INST_Table.WriteString("CP");
+                    CPOS = INST_Table.ReadString().Substring(0, 8);
+                    Console.WriteLine(CPOS);
+                    
+
+                    temp = Math.Abs(double.Parse(CPOS) - MESPOS*INTVAL);
+
+                    //差分が10以上で
+                    if(MESPOS == 0)
+                    {
+                        if(temp > 0.2)
+                        {
+                            temp = 1;
+                        }
+                    }
+                    else 
+                    {
+                        if (temp > 13)
+                        {
+                            //強制終了
+                            MESPOS = MESPOINT;
+                            return;
+                        }
+                           
+                    }
+
+                } while (temp > 0.1); //差分が0.1以下になるまでループ
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void INITVNA()
@@ -649,6 +688,7 @@ namespace TurnTableTest
 
             MESPOINT = 360 / INTVAL;
 
+            Console.WriteLine("INTERVAL,　NUMBER OF MEASUREMENT POINTS");
             Console.WriteLine(INTVAL);
             Console.WriteLine(MESPOINT);
         }
@@ -852,6 +892,12 @@ namespace TurnTableTest
 
                 }
             }
+
+        }
+
+        private void AsyncVNARead1()
+        {
+            Console.WriteLine("1");
 
         }
 
