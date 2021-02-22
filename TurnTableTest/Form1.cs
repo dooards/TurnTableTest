@@ -40,6 +40,7 @@ namespace TurnTableTest
         string VPOINT;
         string[,] results = new string[361, 7];
 
+        int CHKNUM;
         int INTVAL = 0;
         int MESPOINT;
         int MESPOS;
@@ -265,6 +266,8 @@ namespace TurnTableTest
         private async void button_startMeas_Click(object sender, EventArgs e)
         {
 
+            CHKNUM = Chkbox();
+
             if (checkBox_Hol.Checked == true)
             {
                 POL = "PV";
@@ -377,32 +380,39 @@ namespace TurnTableTest
                 //SPD設定
                 INST_Table.WriteString(SPD);
 
+
                 //回転開始
                 INST_Table.WriteString("CWP00370.00");
 
 
                 //測定開始
-                Task t = Task.Run(() => { AsyncVNARead(); });
+                //Task t = Task.Run(() => { AsyncVNARead(); });
+
 
                 //回転中
-                for (MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
+                MESPOS = 0;
+                do //(MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
                 {
                     //回転位置
                     await Task.Run(() => readposition2());
 
+                    //VNA
+                    Task t = Task.Run(() => { AsyncVNARead(); });
+
                     int x = MESPOS * INTVAL;
                     textBox_Angle.Text = x.ToString();
 
-                    //VNA
-                    t = Task.Run(() => { AsyncVNARead(); });
-                }
+                    MESPOS++;
+
+                } while (MESPOS < MESPOINT);
 
 
+                //測定完了
                 string temp = null;
 
                 for (int k = 0; k < MESPOINT; k++)
                 {
-                    for (int l = 0; l < 6; l++)
+                    for (int l = 0; l < CHKNUM; l++)
                     {
                         if (l == 0)
                         {
@@ -471,6 +481,7 @@ namespace TurnTableTest
                 MessageBox.Show(ex.Message);
             }
         }
+
 
         public void INITVNA()
         {
@@ -583,7 +594,7 @@ namespace TurnTableTest
             string START = ":SENS1:FREQ:STAR " + MinF.ToString() + "E6";
             string END = ":SENS1:FREQ:STOP " + MaxF.ToString() + "E6";
             //string SPN = ":SENS1:FREQ:SPAN " + "0" + "E6";
-            string POINT = ":SENS1:SWE:POIN " + "201";
+            string POINT = ":SENS1:SWE:POIN " + "2";
             string POW = ":SOUR1:VPOW " + VPOW;
 
             INST_VNA.WriteString(START);
@@ -764,8 +775,9 @@ namespace TurnTableTest
                 return;
             }
 
+            CHKNUM = Chkbox();
 
-            await Task.Run(() => INITVNA());
+            await Task.Run(() => INITVNA1());
 
 
             //保存するファイルの処理
@@ -826,15 +838,15 @@ namespace TurnTableTest
             }
 
             //測定開始
-            Task t = Task.Run(() => { AsyncVNARead(); });
+            //Task t = Task.Run(() => { AsyncVNARead(); });
 
             try
             {
                 for (MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
                 {
-                    await Task.Run(() => readposition3(omega));
+                    //await Task.Run(() => readposition3(omega));
                     textBox_Angle.Text = MESPOS.ToString();
-                    t = Task.Run(() => { AsyncVNARead(); });
+                    Task t = Task.Run(() => { AsyncVNARead1(); });
                 }
 
 
@@ -842,7 +854,7 @@ namespace TurnTableTest
 
                 for (int k = 0; k < MESPOINT; k++)
                 {
-                    for (int l = 0; l < 6; l++)
+                    for (int l = 0; l < CHKNUM; l++)
                     {
                         if (l == 0)
                         {
@@ -869,6 +881,42 @@ namespace TurnTableTest
 
         }
 
+        private int Chkbox()
+        {
+            int i = 0;
+
+            if (checkBox1.Checked == true)
+            {
+                i++;
+            }
+            if (checkBox2.Checked == true)
+            {
+                i++;
+            }
+            if (checkBox3.Checked == true)
+            {
+                i++;
+            }
+            if (checkBox4.Checked == true)
+            {
+                i++;
+            }
+            if (checkBox5.Checked == true)
+            {
+                i++;
+            }
+            if (checkBox6.Checked == true)
+            {
+                i++;
+            }
+            if (i > 6)
+            {
+                i = 0;
+            }
+
+            return i;
+        }
+
         private void readposition3(int speed)
         {
 
@@ -880,24 +928,167 @@ namespace TurnTableTest
         {
             String[] ReadResults;
 
-            for (int AY = 1; AY < 7; AY++)
+            for (int AY = 0; AY < CHKNUM; AY++)
             {
-                if (TESTMK[AY-1] == 1)
+                if (TESTMK[AY] == 1)
                 {
-                    INST_VNA.WriteString(":CALC1:MARK" + AY.ToString() + ":Y?");
+                    int measnum = AY + 1;
+                    INST_VNA.WriteString(":CALC1:MARK" + measnum.ToString() + ":Y?");
                     ReadResults = INST_VNA.ReadString().Split(',');
                     Console.WriteLine(ReadResults[0]);
                     double num = double.Parse(ReadResults[0], NumberStyles.Float);
-                    results[MESPOS, AY-1] = num.ToString();
+                    results[MESPOS, AY] = num.ToString();
 
                 }
             }
 
         }
 
+        public void INITVNA1()
+        {
+
+            if (checkBox1.Checked == true)
+            {
+                TESTMK[0] = 1;
+
+            }
+            if (checkBox2.Checked == true)
+            {
+                TESTMK[1] = 1;
+
+            }
+            if (checkBox3.Checked == true)
+            {
+                TESTMK[2] = 1;
+
+            }
+            if (checkBox4.Checked == true)
+            {
+                TESTMK[3] = 1;
+
+            }
+            if (checkBox5.Checked == true)
+            {
+                TESTMK[4] = 1;
+
+            }
+            if (checkBox6.Checked == true)
+            {
+                TESTMK[5] = 1;
+
+            }
+
+
+            string CENT = ":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6";
+            string SPN = ":SENS1:FREQ:SPAN " + "0E6";
+            string POINT = ":SENS1:SWE:POIN " + "2";
+            //string POW = ":SOUR1:VPOW " + VPOW;
+
+            INST_VNA.WriteString(CENT);
+            INST_VNA.WriteString(SPN);
+            INST_VNA.WriteString(POINT);
+
+
+
+            if (checkBox1.Checked == true)
+            {
+                INST_VNA.WriteString(":CALC1:MARK1:X " + textBox_MK1.Text + "E6");
+
+            }
+            //if (checkBox2.Checked == true)
+            //{
+            //    INST_VNA.WriteString(":CALC1:MARK2:X " + textBox_MK2.Text + "E6");
+
+            //}
+            //if (checkBox3.Checked == true)
+            //{
+            //    INST_VNA.WriteString(":CALC1:MARK3:X " + textBox_MK3.Text + "E6");
+
+            //}
+            //if (checkBox4.Checked == true)
+            //{
+            //    INST_VNA.WriteString(":CALC1:MARK4:X " + textBox_MK4.Text + "E6");
+
+            //}
+            //if (checkBox5.Checked == true)
+            //{
+            //    INST_VNA.WriteString(":CALC1:MARK5:X " + textBox_MK5.Text + "E6");
+
+            //}
+            //if (checkBox6.Checked == true)
+            //{
+            //    INST_VNA.WriteString(":CALC1:MARK6:X " + textBox_MK6.Text + "E6");
+            //}
+
+
+
+        }
+
         private void AsyncVNARead1()
         {
-            Console.WriteLine("1");
+            String[] ReadResults;
+            string MARK = null;
+            string CENT= null;
+            string SPN = ":SENS1:FREQ:SPAN " + "0E6";
+            string POINT = ":SENS1:SWE:POIN " + "2";
+            //string POW = ":SOUR1:VPOW " + VPOW;
+
+            for (int AY = 0; AY < CHKNUM; AY++)
+            {
+                if (TESTMK[AY] == 1)
+                {
+                    int measnum = AY + 1;
+
+                    if(AY == 0)
+                    { 
+                        CENT = ":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6";
+                        MARK = ":CALC1:MARK1:X " + textBox_MK1.Text + "E6";
+
+                    }
+                    else if(AY == 1)
+                    {
+                        CENT = ":SENS1:FREQ:CENT " + textBox_MK2.Text + "E6";
+                        MARK = ":CALC1:MARK1:X " + textBox_MK2.Text + "E6";
+
+                    }
+                    else if (AY == 2)
+                    {
+                        CENT = ":SENS1:FREQ:CENT " + textBox_MK3.Text + "E6";
+                        MARK = ":CALC1:MARK1:X " + textBox_MK3.Text + "E6";
+
+                    }
+                    else if (AY == 3)
+                    {
+                        CENT = ":SENS1:FREQ:CENT " + textBox_MK4.Text + "E6";
+                        MARK = ":CALC1:MARK1:X " + textBox_MK4.Text + "E6";
+
+                    }
+                    else if (AY == 4)
+                    {
+                        CENT = ":SENS1:FREQ:CENT " + textBox_MK5.Text + "E6";
+                        MARK = ":CALC1:MARK1:X " + textBox_MK5.Text + "E6";
+
+                    }
+                    else if (AY == 5)
+                    {
+                        CENT = ":SENS1:FREQ:CENT " + textBox_MK6.Text + "E6";
+                        MARK = ":CALC1:MARK1:X " + textBox_MK6.Text + "E6";
+
+                    }
+
+                    INST_VNA.WriteString(CENT);
+                    INST_VNA.WriteString(SPN);
+                    INST_VNA.WriteString(POINT);
+                    INST_VNA.WriteString(MARK);
+
+                    INST_VNA.WriteString(":CALC1:MARK1:Y?");
+                    ReadResults = INST_VNA.ReadString().Split(',');
+                    Console.WriteLine(ReadResults[0]);
+                    double num = double.Parse(ReadResults[0], NumberStyles.Float);
+                    results[MESPOS, AY] = num.ToString();
+
+                }
+            }
 
         }
 

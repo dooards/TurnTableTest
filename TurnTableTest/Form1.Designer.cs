@@ -35,6 +35,8 @@
             this.textBox_visaPol = new System.Windows.Forms.TextBox();
             this.textBox_visaVNA = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button_Table = new System.Windows.Forms.Button();
+            this.button_VNA = new System.Windows.Forms.Button();
             this.button_SENDCMD = new System.Windows.Forms.Button();
             this.comboBox_visaList = new System.Windows.Forms.ComboBox();
             this.label13 = new System.Windows.Forms.Label();
@@ -82,8 +84,6 @@
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.checkBox6 = new System.Windows.Forms.CheckBox();
             this.textBox_MK6 = new System.Windows.Forms.TextBox();
-            this.button_VNA = new System.Windows.Forms.Button();
-            this.button_Table = new System.Windows.Forms.Button();
             this.button_VNATEST = new System.Windows.Forms.Button();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.groupBox1.SuspendLayout();
@@ -164,6 +164,26 @@
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "VISA";
+            // 
+            // button_Table
+            // 
+            this.button_Table.Location = new System.Drawing.Point(183, 15);
+            this.button_Table.Name = "button_Table";
+            this.button_Table.Size = new System.Drawing.Size(109, 31);
+            this.button_Table.TabIndex = 35;
+            this.button_Table.Text = "Table";
+            this.button_Table.UseVisualStyleBackColor = true;
+            this.button_Table.Click += new System.EventHandler(this.button_Table_Click);
+            // 
+            // button_VNA
+            // 
+            this.button_VNA.Location = new System.Drawing.Point(183, 55);
+            this.button_VNA.Name = "button_VNA";
+            this.button_VNA.Size = new System.Drawing.Size(109, 32);
+            this.button_VNA.TabIndex = 33;
+            this.button_VNA.Text = "VNA";
+            this.button_VNA.UseVisualStyleBackColor = true;
+            this.button_VNA.Click += new System.EventHandler(this.button_VNA_Click);
             // 
             // button_SENDCMD
             // 
@@ -280,7 +300,7 @@
             this.textBox_FreqCenter.Name = "textBox_FreqCenter";
             this.textBox_FreqCenter.Size = new System.Drawing.Size(40, 19);
             this.textBox_FreqCenter.TabIndex = 6;
-            this.textBox_FreqCenter.Text = "4600";
+            this.textBox_FreqCenter.Text = "4800";
             this.textBox_FreqCenter.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.textBox_FreqCenter.TextChanged += new System.EventHandler(this.textBox_FreqCenter_TextChanged);
             // 
@@ -290,7 +310,7 @@
             this.textBox_FreqBandwidth.Name = "textBox_FreqBandwidth";
             this.textBox_FreqBandwidth.Size = new System.Drawing.Size(40, 19);
             this.textBox_FreqBandwidth.TabIndex = 7;
-            this.textBox_FreqBandwidth.Text = "100";
+            this.textBox_FreqBandwidth.Text = "400";
             this.textBox_FreqBandwidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.textBox_FreqBandwidth.TextChanged += new System.EventHandler(this.textBox_FreqBandwidth_TextChanged);
             // 
@@ -309,7 +329,7 @@
             this.textBox_PointNum.Name = "textBox_PointNum";
             this.textBox_PointNum.Size = new System.Drawing.Size(40, 19);
             this.textBox_PointNum.TabIndex = 8;
-            this.textBox_PointNum.Text = "801";
+            this.textBox_PointNum.Text = "201";
             this.textBox_PointNum.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.textBox_PointNum.TextChanged += new System.EventHandler(this.textBox_PointNum_TextChanged);
             // 
@@ -641,26 +661,6 @@
             this.textBox_MK6.TabIndex = 27;
             this.textBox_MK6.Text = "0";
             this.textBox_MK6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // button_VNA
-            // 
-            this.button_VNA.Location = new System.Drawing.Point(183, 55);
-            this.button_VNA.Name = "button_VNA";
-            this.button_VNA.Size = new System.Drawing.Size(109, 32);
-            this.button_VNA.TabIndex = 33;
-            this.button_VNA.Text = "VNA";
-            this.button_VNA.UseVisualStyleBackColor = true;
-            this.button_VNA.Click += new System.EventHandler(this.button_VNA_Click);
-            // 
-            // button_Table
-            // 
-            this.button_Table.Location = new System.Drawing.Point(183, 15);
-            this.button_Table.Name = "button_Table";
-            this.button_Table.Size = new System.Drawing.Size(109, 31);
-            this.button_Table.TabIndex = 35;
-            this.button_Table.Text = "Table";
-            this.button_Table.UseVisualStyleBackColor = true;
-            this.button_Table.Click += new System.EventHandler(this.button_Table_Click);
             // 
             // button_VNATEST
             // 
