@@ -462,6 +462,7 @@
             // 
             this.textBox_Angle.Location = new System.Drawing.Point(72, 50);
             this.textBox_Angle.Name = "textBox_Angle";
+            this.textBox_Angle.ReadOnly = true;
             this.textBox_Angle.Size = new System.Drawing.Size(112, 19);
             this.textBox_Angle.TabIndex = 8;
             // 

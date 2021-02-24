@@ -34,6 +34,7 @@ namespace TurnTableTest
         string POL = "PV";  // アンテナ向き
 
         //VALUE
+        string MK;
         string VFRQ;
         string VSPN;
         string VPOW;
@@ -44,6 +45,7 @@ namespace TurnTableTest
         int INTVAL = 0;
         int MESPOINT;
         int MESPOS;
+        int CHKPOS;
         int[] TESTMK = { 0, 0, 0, 0, 0, 0, 0 };
 
         //Table position
@@ -92,9 +94,9 @@ namespace TurnTableTest
         //Speed of turn Table to combobox
         private void VELOCITY()
         {
-            string[] VELO = { "0.5", "0.75", "1.0", "1.5", "2.0" };
+            string[] VELO = { "0.25", "0.50", "0.75", "1.0", "1.5", "2.0" };
             comboBox_velo.Items.AddRange(VELO);
-            comboBox_velo.SelectedIndex = 0;
+            comboBox_velo.SelectedIndex = 1;
             SPD = "SPD00000.50";
         }
 
@@ -292,7 +294,6 @@ namespace TurnTableTest
                 }
             }
             
-
         }
 
 
@@ -319,15 +320,7 @@ namespace TurnTableTest
 
             try
             {
-                INST_Table.WriteString("CP");
-                CPOS = INST_Table.ReadString().Substring(0, 8);
 
-                //0位置移動
-                if (CPOS != "00000.00")
-                {
-                    textBox_Distination.Text = "0";
-                    this.button_Move2.PerformClick();
-                }
 
 
                 //保存するファイルの処理
@@ -364,47 +357,77 @@ namespace TurnTableTest
                 }
 
 
-                //逆回転
-                INST_Table.WriteString("CCP00010.00");
-                do
+
+                for (CHKPOS = 0; CHKPOS < 6; CHKPOS++)
                 {
-                    await Task.Run(() => readposition());
-                    textBox_Angle.Text = CPOS;
+                    if (TESTMK[CHKPOS] == 1)
+                    {
+                        //現在位置
+                        INST_Table.WriteString("CP");
+                        CPOS = INST_Table.ReadString().Substring(0, 8);
 
-                } while (CPOS != "00350.00");
+                        //0位置移動
+                        if (CPOS != "00000.00")
+                        {
+                            textBox_Distination.Text = "0";
+                            this.button_Move2.PerformClick();
+                        }
 
-                //VNA測定初期化
-                await Task.Run(() => INITVNA());
+                        //逆回転
+                        INST_Table.WriteString("CCP00010.00");
+                        do
+                        {
+                            await Task.Run(() => readposition());
+                            textBox_Angle.Text = CPOS;
+
+                        } while (CPOS != "00350.00");
+
+                        //VNA測定初期化
+                        await Task.Run(() => INITVNA1()); //
 
 
-                //SPD設定
-                INST_Table.WriteString(SPD);
+                        //SPD設定
+                        INST_Table.WriteString(SPD);
 
 
-                //回転開始
-                INST_Table.WriteString("CWP00370.00");
+                        //回転開始
+                        INST_Table.WriteString("CWP00370.00");
 
 
-                //測定開始
-                //Task t = Task.Run(() => { AsyncVNARead(); });
+                        //測定開始
+                        //Task t = Task.Run(() => { AsyncVNARead(); });
 
 
-                //回転中
-                MESPOS = 0;
-                do //(MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
-                {
-                    //回転位置
-                    await Task.Run(() => readposition2());
+                        //回転中
+                        MESPOS = 0;
+                        do //(MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
+                        {
+                            //回転位置
+                            await Task.Run(() => readposition2());
 
-                    //VNA
-                    Task t = Task.Run(() => { AsyncVNARead(); });
+                            //VNA
+                            //Task t = Task.Run(() => { AsyncVNARead(); }); //
+                            await Task.Run(() => { AsyncVNARead1(); });
 
-                    int x = MESPOS * INTVAL;
-                    textBox_Angle.Text = x.ToString();
+                            int x = MESPOS * INTVAL;
+                            textBox_Angle.Text = x.ToString();
 
-                    MESPOS++;
+                            Console.WriteLine(MESPOS);
+                            MESPOS++;
 
-                } while (MESPOS < MESPOINT);
+                        } while (MESPOS < MESPOINT);
+
+                        do
+                        {
+                            INST_Table.WriteString("CP");
+                            CPOS = INST_Table.ReadString().Substring(0, 8);
+                        } while (CPOS != "00000.00");
+                        
+                    }
+
+                }
+
+
 
 
                 //測定完了
@@ -464,10 +487,11 @@ namespace TurnTableTest
                     }
                     else 
                     {
-                        if (temp > 13)
+                        if (temp > 20)
                         {
                             //強制終了
                             MESPOS = MESPOINT;
+                            MessageBox.Show("ERROR");
                             return;
                         }
                            
@@ -481,7 +505,6 @@ namespace TurnTableTest
                 MessageBox.Show(ex.Message);
             }
         }
-
 
         public void INITVNA()
         {
@@ -659,18 +682,21 @@ namespace TurnTableTest
             switch (comboBox_velo.SelectedIndex)
             {
                 case 0:
-                    SPD = "SPD00000.50";
+                    SPD = "SPD00000.25";
                     break;
                 case 1:
-                    SPD = "SPD00000.75";
+                    SPD = "SPD00000.50";
                     break;
                 case 2:
-                    SPD = "SPD00001.00";
+                    SPD = "SPD00000.75";
                     break;
                 case 3:
-                    SPD = "SPD00001.50";
+                    SPD = "SPD00001.00";
                     break;
                 case 4:
+                    SPD = "SPD00001.50";
+                    break;
+                case 5:
                     SPD = "SPD00002.00";
                     break;
 
@@ -844,9 +870,10 @@ namespace TurnTableTest
             {
                 for (MESPOS = 0; MESPOS < MESPOINT; MESPOS++)
                 {
-                    //await Task.Run(() => readposition3(omega));
+                    await Task.Run(() => readposition3(omega));
                     textBox_Angle.Text = MESPOS.ToString();
-                    Task t = Task.Run(() => { AsyncVNARead1(); });
+                    //Task t = Task.Run(() => { AsyncVNARead1(); });
+                    AsyncVNARead1();
                 }
 
 
@@ -888,31 +915,39 @@ namespace TurnTableTest
             if (checkBox1.Checked == true)
             {
                 i++;
+                TESTMK[0] = 1;
             }
             if (checkBox2.Checked == true)
             {
                 i++;
+                TESTMK[1] = 1;
             }
             if (checkBox3.Checked == true)
             {
                 i++;
+                TESTMK[2] = 1;
             }
             if (checkBox4.Checked == true)
             {
                 i++;
+                TESTMK[3] = 1;
             }
             if (checkBox5.Checked == true)
             {
                 i++;
+                TESTMK[4] = 1;
             }
             if (checkBox6.Checked == true)
             {
                 i++;
+                TESTMK[5] = 1;
             }
             if (i > 6)
             {
                 i = 0;
             }
+
+
 
             return i;
         }
@@ -946,55 +981,65 @@ namespace TurnTableTest
 
         public void INITVNA1()
         {
+            
 
-            if (checkBox1.Checked == true)
+            if (CHKPOS == 0)
             {
-                TESTMK[0] = 1;
+                MK = textBox_MK1.Text;
 
             }
-            if (checkBox2.Checked == true)
+            else if (CHKPOS == 1)
             {
-                TESTMK[1] = 1;
+                MK = textBox_MK2.Text;
 
             }
-            if (checkBox3.Checked == true)
+            else if (CHKPOS == 2)
             {
-                TESTMK[2] = 1;
+                MK = textBox_MK3.Text;
 
             }
-            if (checkBox4.Checked == true)
+            else if (CHKPOS == 3)
             {
-                TESTMK[3] = 1;
+                MK = textBox_MK4.Text;
 
             }
-            if (checkBox5.Checked == true)
+            else if (CHKPOS == 4)
             {
-                TESTMK[4] = 1;
+                MK = textBox_MK5.Text;
 
             }
-            if (checkBox6.Checked == true)
+            else if (CHKPOS == 5)
             {
-                TESTMK[5] = 1;
+                MK = textBox_MK6.Text;
+
+            }
+            else
+            {
 
             }
 
 
-            string CENT = ":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6";
+            string CENT = ":SENS1:FREQ:CENT " + MK + "E6";
             string SPN = ":SENS1:FREQ:SPAN " + "0E6";
             string POINT = ":SENS1:SWE:POIN " + "2";
+            string MKX = ":CALC1:MARK1:X " + MK + "E6";
             //string POW = ":SOUR1:VPOW " + VPOW;
 
             INST_VNA.WriteString(CENT);
             INST_VNA.WriteString(SPN);
             INST_VNA.WriteString(POINT);
 
+            INST_VNA.WriteString(MKX);
+            INST_VNA.WriteString(":CALC1:MARK1 ON");
 
 
-            if (checkBox1.Checked == true)
-            {
-                INST_VNA.WriteString(":CALC1:MARK1:X " + textBox_MK1.Text + "E6");
+            //if (checkBox1.Checked == true)
+            //{
+            //    INST_VNA.WriteString(":CALC1:MARK1:X " + MK + "E6");
+            //    INST_VNA.WriteString(":CALC1:MARK1 ON");
+                
 
-            }
+            //}
             //if (checkBox2.Checked == true)
             //{
             //    INST_VNA.WriteString(":CALC1:MARK2:X " + textBox_MK2.Text + "E6");
@@ -1024,71 +1069,18 @@ namespace TurnTableTest
 
         }
 
+
         private void AsyncVNARead1()
         {
             String[] ReadResults;
-            string MARK = null;
-            string CENT= null;
-            string SPN = ":SENS1:FREQ:SPAN " + "0E6";
-            string POINT = ":SENS1:SWE:POIN " + "2";
-            //string POW = ":SOUR1:VPOW " + VPOW;
+            double num;      
 
-            for (int AY = 0; AY < CHKNUM; AY++)
-            {
-                if (TESTMK[AY] == 1)
-                {
-                    int measnum = AY + 1;
+            INST_VNA.WriteString(":CALC1:MARK1:Y?");
+            ReadResults = INST_VNA.ReadString().Split(',');
+            num = double.Parse(ReadResults[0], NumberStyles.Float);
 
-                    if(AY == 0)
-                    { 
-                        CENT = ":SENS1:FREQ:CENT " + textBox_MK1.Text + "E6";
-                        MARK = ":CALC1:MARK1:X " + textBox_MK1.Text + "E6";
-
-                    }
-                    else if(AY == 1)
-                    {
-                        CENT = ":SENS1:FREQ:CENT " + textBox_MK2.Text + "E6";
-                        MARK = ":CALC1:MARK1:X " + textBox_MK2.Text + "E6";
-
-                    }
-                    else if (AY == 2)
-                    {
-                        CENT = ":SENS1:FREQ:CENT " + textBox_MK3.Text + "E6";
-                        MARK = ":CALC1:MARK1:X " + textBox_MK3.Text + "E6";
-
-                    }
-                    else if (AY == 3)
-                    {
-                        CENT = ":SENS1:FREQ:CENT " + textBox_MK4.Text + "E6";
-                        MARK = ":CALC1:MARK1:X " + textBox_MK4.Text + "E6";
-
-                    }
-                    else if (AY == 4)
-                    {
-                        CENT = ":SENS1:FREQ:CENT " + textBox_MK5.Text + "E6";
-                        MARK = ":CALC1:MARK1:X " + textBox_MK5.Text + "E6";
-
-                    }
-                    else if (AY == 5)
-                    {
-                        CENT = ":SENS1:FREQ:CENT " + textBox_MK6.Text + "E6";
-                        MARK = ":CALC1:MARK1:X " + textBox_MK6.Text + "E6";
-
-                    }
-
-                    INST_VNA.WriteString(CENT);
-                    INST_VNA.WriteString(SPN);
-                    INST_VNA.WriteString(POINT);
-                    INST_VNA.WriteString(MARK);
-
-                    INST_VNA.WriteString(":CALC1:MARK1:Y?");
-                    ReadResults = INST_VNA.ReadString().Split(',');
-                    Console.WriteLine(ReadResults[0]);
-                    double num = double.Parse(ReadResults[0], NumberStyles.Float);
-                    results[MESPOS, AY] = num.ToString();
-
-                }
-            }
+            Console.WriteLine(ReadResults[0]);
+            results[MESPOS, CHKPOS] = num.ToString();
 
         }
 
