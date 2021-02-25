@@ -22,8 +22,6 @@ namespace TurnTableTest
         private FormattedIO488 INST_VNA = new FormattedIO488();
         private FormattedIO488 INST_Tower = new FormattedIO488();
 
-
-
         //VISA
         string E5071C;
         string Table;
@@ -94,7 +92,7 @@ namespace TurnTableTest
         //Speed of turn Table to combobox
         private void VELOCITY()
         {
-            string[] VELO = { "0.25", "0.50", "0.75", "1.0", "1.5", "2.0" };
+            string[] VELO = { "0.30", "0.50", "0.75", "1.0", "1.5", "2.0" };
             comboBox_velo.Items.AddRange(VELO);
             comboBox_velo.SelectedIndex = 1;
             SPD = "SPD00000.50";
@@ -412,7 +410,7 @@ namespace TurnTableTest
                             int x = MESPOS * INTVAL;
                             textBox_Angle.Text = x.ToString();
 
-                            Console.WriteLine(MESPOS);
+                            //Console.WriteLine(MESPOS);
                             MESPOS++;
 
                         } while (MESPOS < MESPOINT);
@@ -430,7 +428,7 @@ namespace TurnTableTest
 
 
 
-                //測定完了
+                //測定完了　データ書き込み
                 string temp = null;
 
                 for (int k = 0; k < MESPOINT; k++)
@@ -472,7 +470,7 @@ namespace TurnTableTest
                 {
                     INST_Table.WriteString("CP");
                     CPOS = INST_Table.ReadString().Substring(0, 8);
-                    Console.WriteLine(CPOS);
+                    //Console.WriteLine(CPOS);
                     
 
                     temp = Math.Abs(double.Parse(CPOS) - MESPOS*INTVAL);
@@ -682,7 +680,7 @@ namespace TurnTableTest
             switch (comboBox_velo.SelectedIndex)
             {
                 case 0:
-                    SPD = "SPD00000.25";
+                    SPD = "SPD00000.30";
                     break;
                 case 1:
                     SPD = "SPD00000.50";
@@ -701,7 +699,7 @@ namespace TurnTableTest
                     break;
 
             }
-            Console.WriteLine(SPD);
+            //Console.WriteLine(SPD);
         }
 
         private void comboBox_interval_SelectedIndexChanged(object sender, EventArgs e)
@@ -725,53 +723,69 @@ namespace TurnTableTest
 
             MESPOINT = 360 / INTVAL;
 
-            Console.WriteLine("INTERVAL,　NUMBER OF MEASUREMENT POINTS");
-            Console.WriteLine(INTVAL);
-            Console.WriteLine(MESPOINT);
+            //Console.WriteLine("INTERVAL,　NUMBER OF MEASUREMENT POINTS");
+            //Console.WriteLine(INTVAL);
+            //Console.WriteLine(MESPOINT);
         }
 
         private void button_Table_Click(object sender, EventArgs e)
         {
-            if (INST_Table.IO == null)
+            try
             {
-                INST_Table.IO = (IMessage)RM.Open(Table, AccessMode.NO_LOCK, 5000, "");
-                INST_Table.IO.Timeout = 5000;
-                INST_Table.IO.Clear();
-                INST_Table.WriteString("DL0");
-                INST_Table.WriteString("S1");
-                INST_Table.WriteString("HD0");
-                INST_Table.WriteString("VL1");
-                INST_Table.WriteString("M0");
+                if (INST_Table.IO == null)
+                {
+                    INST_Table.IO = (IMessage)RM.Open(Table, AccessMode.NO_LOCK, 5000, "");
+                    INST_Table.IO.Timeout = 5000;
+                    INST_Table.IO.Clear();
+                    INST_Table.WriteString("DL0");
+                    INST_Table.WriteString("S1");
+                    INST_Table.WriteString("HD0");
+                    INST_Table.WriteString("VL1");
+                    INST_Table.WriteString("M0");
 
-                button_Table.Text = "Table OFF";
+                    button_Table.Text = "Table OFF";
+                }
+                else
+                {
+                    INST_Table.IO.Clear();
+                    INST_Table.IO.Close();
+                    INST_Table.IO = null;
+
+                    button_Table.Text = "Table ON";
+                }
             }
-            else
+            catch
             {
-                INST_Table.IO.Clear();
-                INST_Table.IO.Close();
-                INST_Table.IO = null;
-
-                button_Table.Text = "Table ON";
+                MessageBox.Show("IO ERROR");
             }
+
 
         }
 
         private void button_VNA_Click(object sender, EventArgs e)
         {
-            if (INST_VNA.IO == null)
+            try
             {
-                INST_VNA.IO = (IMessage)RM.Open(E5071C, AccessMode.NO_LOCK, 5000, "");
-                INST_VNA.IO.Timeout = 5000;
-                button_VNA.Text = "VNA OFF";
-            }
-            else
-            {
-                INST_VNA.IO.Clear();
-                INST_VNA.IO.Close();
-                INST_VNA.IO = null;
+                if (INST_VNA.IO == null)
+                {
+                    INST_VNA.IO = (IMessage)RM.Open(E5071C, AccessMode.NO_LOCK, 5000, "");
+                    INST_VNA.IO.Timeout = 5000;
+                    button_VNA.Text = "VNA OFF";
+                }
+                else
+                {
+                    INST_VNA.IO.Clear();
+                    INST_VNA.IO.Close();
+                    INST_VNA.IO = null;
 
-                button_VNA.Text = "VNA ON";
+                    button_VNA.Text = "VNA ON";
+                }
             }
+            catch
+            {
+                MessageBox.Show("IO ERROR");
+            }
+
         }
 
         private void textBox_visaTable_TextChanged(object sender, EventArgs e)
@@ -970,7 +984,7 @@ namespace TurnTableTest
                     int measnum = AY + 1;
                     INST_VNA.WriteString(":CALC1:MARK" + measnum.ToString() + ":Y?");
                     ReadResults = INST_VNA.ReadString().Split(',');
-                    Console.WriteLine(ReadResults[0]);
+                    //Console.WriteLine(ReadResults[0]);
                     double num = double.Parse(ReadResults[0], NumberStyles.Float);
                     results[MESPOS, AY] = num.ToString();
 
@@ -982,7 +996,7 @@ namespace TurnTableTest
         public void INITVNA1()
         {
             
-
+            //測定周波数
             if (CHKPOS == 0)
             {
                 MK = textBox_MK1.Text;
@@ -1018,55 +1032,24 @@ namespace TurnTableTest
 
             }
 
-
+            //VNA設定
             string CENT = ":SENS1:FREQ:CENT " + MK + "E6";
             string SPN = ":SENS1:FREQ:SPAN " + "0E6";
             string POINT = ":SENS1:SWE:POIN " + "2";
             string MKX = ":CALC1:MARK1:X " + MK + "E6";
+            string AVE = ":SENS1:AVER:COUN 64";
+            string BND = "SENS1:BAND 50";
             //string POW = ":SOUR1:VPOW " + VPOW;
 
             INST_VNA.WriteString(CENT);
             INST_VNA.WriteString(SPN);
             INST_VNA.WriteString(POINT);
-
+            INST_VNA.WriteString(BND);
+            //INST_VNA.WriteString(AVE);
+            INST_VNA.WriteString(":SENS1:AVER OFF");
+            INST_VNA.WriteString(":CALC1:SMO:STAT OFF");
             INST_VNA.WriteString(MKX);
             INST_VNA.WriteString(":CALC1:MARK1 ON");
-
-
-            //if (checkBox1.Checked == true)
-            //{
-            //    INST_VNA.WriteString(":CALC1:MARK1:X " + MK + "E6");
-            //    INST_VNA.WriteString(":CALC1:MARK1 ON");
-                
-
-            //}
-            //if (checkBox2.Checked == true)
-            //{
-            //    INST_VNA.WriteString(":CALC1:MARK2:X " + textBox_MK2.Text + "E6");
-
-            //}
-            //if (checkBox3.Checked == true)
-            //{
-            //    INST_VNA.WriteString(":CALC1:MARK3:X " + textBox_MK3.Text + "E6");
-
-            //}
-            //if (checkBox4.Checked == true)
-            //{
-            //    INST_VNA.WriteString(":CALC1:MARK4:X " + textBox_MK4.Text + "E6");
-
-            //}
-            //if (checkBox5.Checked == true)
-            //{
-            //    INST_VNA.WriteString(":CALC1:MARK5:X " + textBox_MK5.Text + "E6");
-
-            //}
-            //if (checkBox6.Checked == true)
-            //{
-            //    INST_VNA.WriteString(":CALC1:MARK6:X " + textBox_MK6.Text + "E6");
-            //}
-
-
-
         }
 
 
@@ -1079,7 +1062,7 @@ namespace TurnTableTest
             ReadResults = INST_VNA.ReadString().Split(',');
             num = double.Parse(ReadResults[0], NumberStyles.Float);
 
-            Console.WriteLine(ReadResults[0]);
+            //Console.WriteLine(ReadResults[0]);
             results[MESPOS, CHKPOS] = num.ToString();
 
         }
