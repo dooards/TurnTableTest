@@ -53,8 +53,12 @@ namespace TurnTableTest
         //結果のファイル
         StreamWriter data;
 
+        //name
+        string MeasFileName;
+        string TempName = "data";
+
         //flag
-        
+
 
 
         public Form1()
@@ -315,6 +319,7 @@ namespace TurnTableTest
         //MEASUREMENT
         private async Task TEST()
         {
+            
 
             try
             {
@@ -322,23 +327,24 @@ namespace TurnTableTest
 
 
                 //保存するファイルの処理
-                string MeasFileName = null;
-
+                
+                               
                 if (POL == "PH")
                 {
-                    MeasFileName = "dataH.csv";
+                    MeasFileName = TempName + "H.csv";
                 }
                 else if (POL == "PV")
                 {
-                    MeasFileName = "dataV.csv";
-                }
-                else
-                {
-                    return;
+                    MeasFileName = TempName + "V.csv";
                 }
 
+
                 saveFileDialog1.FileName = MeasFileName;
-                saveFileDialog1.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
+                
+                string[] TNA = saveFileDialog1.FileName.Split('.');
+                TempName = TNA[0];
+
+                saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
                 saveFileDialog1.FilterIndex = 2;
                 saveFileDialog1.RestoreDirectory = true;
 
@@ -409,6 +415,8 @@ namespace TurnTableTest
 
                             int x = MESPOS * INTVAL;
                             textBox_Angle.Text = x.ToString();
+
+                            textBox_VALUE.Text = results[MESPOS, CHKPOS];
 
                             //Console.WriteLine(MESPOS);
                             MESPOS++;
@@ -1063,6 +1071,7 @@ namespace TurnTableTest
             num = double.Parse(ReadResults[0], NumberStyles.Float);
 
             //Console.WriteLine(ReadResults[0]);
+            //textBox_VALUE.Text = num.ToString();
             results[MESPOS, CHKPOS] = num.ToString();
 
         }
