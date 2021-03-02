@@ -55,7 +55,7 @@ namespace TurnTableTest
 
         //name
         string MeasFileName;
-        string TempName = "data";
+        string[] TempName;
 
         //flag
 
@@ -327,38 +327,119 @@ namespace TurnTableTest
 
 
                 //保存するファイルの処理
-                
-                               
-                if (POL == "PH")
+                if ( checkBox_Hol.Checked == true)
                 {
-                    MeasFileName = TempName + "H.csv";
-                }
-                else if (POL == "PV")
-                {
-                    MeasFileName = TempName + "V.csv";
-                }
+                    if (checkBox_Vel.Checked == true)
+                    {
+                        if (POL == "PH")
+                        {
+                            saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
+                            saveFileDialog1.FilterIndex = 2;
+                            saveFileDialog1.RestoreDirectory = true;
 
+                            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                            {
+                                TempName = saveFileDialog1.FileName.Split('.');
+                                MeasFileName = TempName[0] + "_H.csv";
+                                data = new StreamWriter(MeasFileName, true, Encoding.Default);
+                                MessageBox.Show("Measurement START");
+                            }
+                            else
+                            {
+                                MessageBox.Show("Measurement STOP");
+                                return;
+                            }
+                        }
+                        else if(POL == "PV")
+                        {
+                            TempName = saveFileDialog1.FileName.Split('.');
+                            MeasFileName = TempName[0] + "_V.csv";
+                            data = new StreamWriter(MeasFileName, true, Encoding.Default);
+                            //MessageBox.Show("Measurement START");
+                        }
+                    }
 
-                saveFileDialog1.FileName = MeasFileName;
-                
-                string[] TNA = saveFileDialog1.FileName.Split('.');
-                TempName = TNA[0];
+                    else
+                    {
+                        if(POL == "PH")
+                        {
+                            saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
+                            saveFileDialog1.FilterIndex = 2;
+                            saveFileDialog1.RestoreDirectory = true;
 
-                saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
-                saveFileDialog1.FilterIndex = 2;
-                saveFileDialog1.RestoreDirectory = true;
+                            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                            {
+                                TempName = saveFileDialog1.FileName.Split('.');
+                                MeasFileName = TempName[0] + "_H.csv";
+                                data = new StreamWriter(MeasFileName, true, Encoding.Default);
+                                MessageBox.Show("Measurement START");
+                            }
+                            else
+                            {
+                                MessageBox.Show("Measurement STOP");
+                                return;
+                            }
+                        }
+                        else if (POL == "PV")
+                        {
+                            MessageBox.Show("Measurement Error1 STOP");
+                            return;
+                        }
 
-                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-                {
-                    string file = saveFileDialog1.FileName;
-                    data = new StreamWriter(file, true, Encoding.Default);
-                    MessageBox.Show("Measurement START");
+                    }
                 }
                 else
                 {
-                    MessageBox.Show("Measurement STOP");
-                    return;
+                    if (checkBox_Vel.Checked == true)
+                    {
+                        if (POL == "PV")
+                        {
+                            saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
+                            saveFileDialog1.FilterIndex = 2;
+                            saveFileDialog1.RestoreDirectory = true;
+
+                            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                            {
+                                TempName = saveFileDialog1.FileName.Split('.');
+                                MeasFileName = TempName[0] + "_V.csv";
+                                data = new StreamWriter(MeasFileName, true, Encoding.Default);
+                                MessageBox.Show("Measurement START");
+                            }
+                            else
+                            {
+                                MessageBox.Show("Measurement STOP");
+                                return;
+                            }
+                        }
+                        else if (POL == "PH")
+                        {
+                            MessageBox.Show("Measurement Error2 STOP");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("ALL Polarities are OFF");
+                        return;
+                    }
                 }
+                
+                               
+                //if (POL == "PH")
+                //{
+                //    MeasFileName = TempName + "H.csv";
+                //}
+                //else if (POL == "PV")
+                //{
+                //    MeasFileName = TempName + "V.csv";
+                //}
+
+
+                //saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
+                //saveFileDialog1.FilterIndex = 2;
+                //saveFileDialog1.RestoreDirectory = true;
+
+
 
 
 
@@ -457,7 +538,22 @@ namespace TurnTableTest
                 }
 
                 data.Close();
-                MessageBox.Show("END");
+                if (POL == "PH")
+                {
+                    if(checkBox_Vel.Checked == true || checkBox_Hol.Checked == true)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        MessageBox.Show("END");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("END");
+                }
+                
                 
 
             }

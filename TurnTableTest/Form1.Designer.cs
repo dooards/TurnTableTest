@@ -409,7 +409,7 @@
             this.textBox_MK1.Name = "textBox_MK1";
             this.textBox_MK1.Size = new System.Drawing.Size(40, 19);
             this.textBox_MK1.TabIndex = 13;
-            this.textBox_MK1.Text = "4600";
+            this.textBox_MK1.Text = "4700";
             this.textBox_MK1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // textBox_MK2
@@ -418,7 +418,7 @@
             this.textBox_MK2.Name = "textBox_MK2";
             this.textBox_MK2.Size = new System.Drawing.Size(40, 19);
             this.textBox_MK2.TabIndex = 15;
-            this.textBox_MK2.Text = "0";
+            this.textBox_MK2.Text = "4800";
             this.textBox_MK2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // textBox_MK3
@@ -427,7 +427,7 @@
             this.textBox_MK3.Name = "textBox_MK3";
             this.textBox_MK3.Size = new System.Drawing.Size(40, 19);
             this.textBox_MK3.TabIndex = 16;
-            this.textBox_MK3.Text = "0";
+            this.textBox_MK3.Text = "4900";
             this.textBox_MK3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // groupBox3
